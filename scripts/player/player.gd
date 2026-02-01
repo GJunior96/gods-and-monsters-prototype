@@ -6,7 +6,13 @@ var life := max_life
 var damage_cooldown := 0.5
 var can_take_damage := true
 
+@onready var weapon = $Weapon
+
+
 func _physics_process(delta):
+
+	weapon.try_shoot()
+
 	var direction := Vector2.ZERO
 
 	direction.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")

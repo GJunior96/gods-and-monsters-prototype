@@ -6,12 +6,14 @@ extends Node2D
 
 var can_fire := true
 
-func _process(delta):
-	if can_fire:
-		shoot()
+#func _process(delta):
+#	if can_fire:
+#		shoot()
 
+func try_shoot():
+	if not can_fire:
+		return
 
-func shoot():
 	var target = get_closest_enemy()
 	if target == null:
 		return
@@ -21,16 +23,31 @@ func shoot():
 	var projectile = projectile_scene.instantiate()
 	get_tree().current_scene.add_child(projectile)
 
-	print("Weapon:", global_position)
-	print("Target:", target.global_position)
-	print("Dir:", target.global_position - global_position)
-
-
 	projectile.global_position = global_position
 	projectile.direction = (target.global_position - global_position).normalized()
-	print(projectile.direction)
+
 	await get_tree().create_timer(fire_rate).timeout
 	can_fire = true
+
+#func shoot():
+#	var target = get_closest_enemy()
+#	if target == null:
+#		return
+#
+#	can_fire = false
+#
+#	var projectile = projectile_scene.instantiate()
+#
+#	print("Weapon:", global_position)
+#	print("Target:", target.global_position)
+#	print("Dir:", target.global_position - global_position)
+#
+#
+#	projectile.global_position = global_position
+#	projectile.direction = (target.global_position - global_position).normalized()
+#	print(projectile.direction)
+#	await get_tree().create_timer(fire_rate).timeout
+#	can_fire = true
 
 
 func get_closest_enemy():
