@@ -4,6 +4,7 @@ extends Node2D
 @export var enemy_scene: PackedScene
 @export var spawn_interval := 1.5
 @export var spawn_distance := 400.0
+@export var max_enemies := 15
 
 var player: CharacterBody2D
 
@@ -18,11 +19,16 @@ func _spawn_loop():
 
 
 func spawn_enemy():
+	if get_tree().get_nodes_in_group("enemies").size() >= max_enemies:
+		return
+
+
 	if player == null or enemy_scene == null:
 		return
 
 	var enemy = enemy_scene.instantiate()
-	get_parent().add_child(enemy)
+	enemy.name = "Enemy_%d" % randi()
+	add_child(enemy)
 
 	var angle = randf() * TAU
 	var offset = Vector2(cos(angle), sin(angle)) * spawn_distance

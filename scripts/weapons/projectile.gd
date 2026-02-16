@@ -1,15 +1,19 @@
 extends Area2D
 
 @export var speed := 450.0
-@export var damage := 20
+@export var damage := 5
 
 var direction: Vector2 = Vector2.ZERO
 
-func _process(delta):
+func _physics_process(delta):
 	position += direction * speed * delta
 
 
 func _on_body_entered(body):
-	if body.is_in_group("enemies"):
+	if not body is Enemy:
+		return
+
+	if body is Enemy:
+		GlobalLogger.log("Projectile hit: %s | Groups: %s" % [body.name, body.get_groups()])
 		body.take_damage(damage)
 		queue_free()

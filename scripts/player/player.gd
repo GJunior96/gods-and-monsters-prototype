@@ -21,25 +21,18 @@ func _physics_process(delta):
 	velocity = direction.normalized() * speed
 	move_and_slide()
 
-	_check_enemy_collision()
 
-
-func _check_enemy_collision():
+func take_damage(amount: int):
 	if not can_take_damage:
 		return
 
-	for i in range(get_slide_collision_count()):
-		var collision = get_slide_collision(i)
-		var collider = collision.get_collider()
-
-		if collider and collider.is_in_group("enemies"):
-			take_damage(10)
-			break
-
-func take_damage(amount: int):
-	life -= amount
 	can_take_damage = false
-	print("Player life:", life)
+
+	life -= amount
+	GlobalLogger.log("Player life: %s" % life)
+
+	if life <= 0:
+		queue_free()
 
 	await get_tree().create_timer(damage_cooldown).timeout
 	can_take_damage = true
