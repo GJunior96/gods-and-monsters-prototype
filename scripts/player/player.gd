@@ -32,6 +32,7 @@ func take_damage(amount: int):
 	GlobalLogger.log("Player life: %s" % life)
 
 	if life <= 0:
+		GameManager.game_over()
 		queue_free()
 
 	await get_tree().create_timer(damage_cooldown).timeout

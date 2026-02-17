@@ -1,13 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://dkbapbpap7p5w"]
+[gd_scene load_steps=5 format=3 uid="uid://dkbapbpap7p5w"]
 
 [ext_resource type="PackedScene" uid="uid://bjcrg74hogbu2" path="res://scenes/player/player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://daw68dg1q7e2" path="res://scenes/enemies/enemy.tscn" id="3_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://7odmpbqt0146" path="res://scenes/ui/GameOverUI.tscn" id="4_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://ddayxe2ujmpub" path="res://scenes/systems/enemy_spawner.tscn" id="5_lquwl"]
 
 [node name="Main" type="Node2D"]
 position = Vector2(-20, -47)
 
-[node name="Player" parent="." groups=["player"] instance=ExtResource("1_ig7tw")]
+[node name="Player" parent="." instance=ExtResource("1_ig7tw")]
 position = Vector2(50, 291)
 rotation = 3.0996983
 
@@ -17,3 +18,5 @@ target = NodePath("../Player")
 
 [node name="EnemySpawner" parent="." instance=ExtResource("5_lquwl")]
 enemy_scene = ExtResource("3_1bvp3")
+
+[node name="GameOverUi" parent="." instance=ExtResource("4_1bvp3")]
