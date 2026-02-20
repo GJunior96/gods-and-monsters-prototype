@@ -1,0 +1,17 @@
+[gd_scene load_steps=4 format=3 uid="uid://dkxmbst87rqvr"]
+
+[ext_resource type="Texture2D" uid="uid://c7e34uynbw8p3" path="res://sprites temporarios/square 16 blue.png" id="1_iwl14"]
+[ext_resource type="Script" uid="uid://dlcwhhfp31okr" path="res://scripts/systems/xp_drop.gd" id="1_y0ixo"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_y0ixo"]
+
+[node name="XpDrop" type="Area2D"]
+script = ExtResource("1_y0ixo")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_y0ixo")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_iwl14")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

@@ -5,10 +5,10 @@
 [ext_resource type="PackedScene" uid="uid://bsniu1do8p22k" path="res://scenes/weapons/weapon.tscn" id="3_gmlin"]
 [ext_resource type="PackedScene" uid="uid://ca85amsj0y7n" path="res://scenes/weapons/projectile.tscn" id="4_lvxji"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_dovo2"]
-size = Vector2(43, 48)
+[sub_resource type="CircleShape2D" id="CircleShape2D_lvxji"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_lvxji"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_p47bc"]
+radius = 12.0
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_mask = 2
@@ -18,8 +18,7 @@ script = ExtResource("2_dovo2")
 texture = ExtResource("2_lvxji")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(11.5, 14)
-shape = SubResource("RectangleShape2D_dovo2")
+shape = SubResource("CircleShape2D_lvxji")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true
@@ -28,10 +27,9 @@ position_smoothing_enabled = true
 scale = Vector2(0.3, 0.3)
 projectile_scene = ExtResource("4_lvxji")
 
-[node name="HurtBox (Area2D)" type="Area2D" parent="."]
-collision_mask = 2
+[node name="HurtBox" type="Area2D" parent="." groups=["player_hurtbox"]]
+collision_layer = 8
+collision_mask = 16
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox (Area2D)"]
-shape = SubResource("RectangleShape2D_lvxji")
-
-[connection signal="body_entered" from="HurtBox (Area2D)" to="." method="_on_hurt_box_area_2d_body_entered"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
+shape = SubResource("CircleShape2D_p47bc")

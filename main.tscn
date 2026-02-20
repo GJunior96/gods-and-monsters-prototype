@@ -1,16 +1,17 @@
-[gd_scene load_steps=5 format=3 uid="uid://dkbapbpap7p5w"]
+[gd_scene load_steps=6 format=3 uid="uid://dkbapbpap7p5w"]
 
 [ext_resource type="PackedScene" uid="uid://bjcrg74hogbu2" path="res://scenes/player/player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://daw68dg1q7e2" path="res://scenes/enemies/enemy.tscn" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://7odmpbqt0146" path="res://scenes/ui/GameOverUI.tscn" id="4_1bvp3"]
+[ext_resource type="Script" uid="uid://coh3vo3ncnwe8" path="res://scripts/ui/xp_bar_ui.gd" id="5_7mycd"]
 [ext_resource type="PackedScene" uid="uid://ddayxe2ujmpub" path="res://scenes/systems/enemy_spawner.tscn" id="5_lquwl"]
 
 [node name="Main" type="Node2D"]
 position = Vector2(-20, -47)
 
 [node name="Player" parent="." instance=ExtResource("1_ig7tw")]
-position = Vector2(50, 291)
-rotation = 3.0996983
+position = Vector2(260, 180)
+rotation = 3.1415927
 
 [node name="Enemy" parent="." node_paths=PackedStringArray("target") instance=ExtResource("3_1bvp3")]
 position = Vector2(26, 714)
@@ -20,3 +21,10 @@ target = NodePath("../Player")
 enemy_scene = ExtResource("3_1bvp3")
 
 [node name="GameOverUi" parent="." instance=ExtResource("4_1bvp3")]
+
+[node name="XPBar" type="CanvasLayer" parent="."]
+script = ExtResource("5_7mycd")
+
+[node name="TextureProgressBar" type="TextureProgressBar" parent="XPBar"]
+offset_right = 73.0
+offset_bottom = 14.0
