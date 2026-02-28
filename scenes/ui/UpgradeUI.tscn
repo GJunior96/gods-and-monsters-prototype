@@ -1,0 +1,44 @@
+[gd_scene load_steps=2 format=3 uid="uid://bcdx48b1luddu"]
+
+[ext_resource type="Script" uid="uid://bddwdj84seie" path="res://scripts/ui/upgrade_ui.gd" id="1_t4xms"]
+
+[node name="UpgradeUi" type="CanvasLayer" groups=["upgrade_ui"]]
+script = ExtResource("1_t4xms")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -4.0
+offset_top = -29.5
+offset_right = 4.0
+offset_bottom = 29.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="LEVEL UP" type="Label" parent="Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="UpgradeDamage" type="Button" parent="Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="UpgradeSpeed" type="Button" parent="Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="UpgradeFireRate" type="Button" parent="Panel/VBoxContainer"]
+layout_mode = 2
+
+[connection signal="pressed" from="Panel/VBoxContainer/UpgradeDamage" to="." method="_on_upgrade_damage_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/UpgradeSpeed" to="." method="_on_upgrade_speed_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/UpgradeFireRate" to="." method="_on_upgrade_fire_rate_pressed"]

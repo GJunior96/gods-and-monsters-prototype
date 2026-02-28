@@ -1,8 +1,13 @@
+class_name Weapon
 extends Node2D
 
 @export var projectile_scene: PackedScene
 @export var fire_rate := 0.6
 @export var range := 500.0
+@export var base_damage := 10
+@export var speed := 450.0
+var damage_multiplier := 1.0
+
 
 var can_fire := true
 
@@ -17,6 +22,8 @@ func try_shoot():
 	can_fire = false
 
 	var projectile = projectile_scene.instantiate()
+	projectile.damage = base_damage * damage_multiplier
+	projectile.speed = speed
 	get_tree().current_scene.add_child(projectile)
 
 	projectile.global_position = global_position
@@ -38,3 +45,15 @@ func get_closest_enemy():
 			closest = enemy
 
 	return closest
+
+
+func upgrade(stat: String, amount: float):
+	match stat:
+		"damage":
+			base_damage += amount
+		"speed":
+			speed += amount
+		"range":
+			range += amount
+		"fire_rate":
+			fire_rate -= max(0.05, fire_rate - amount)

@@ -14,6 +14,7 @@ var xp_to_next_level: int = 20
 
 signal xp_changed(current, max)
 signal leveled_up(new_level)
+signal game_over
 
 
 func _physics_process(delta):
@@ -40,7 +41,7 @@ func take_damage(amount: int):
 	GlobalLogger.log("Player life: %s" % life)
 
 	if life <= 0:
-		GameManager.game_over()
+		game_over.emit()
 		queue_free()
 
 	await get_tree().create_timer(damage_cooldown).timeout
@@ -50,7 +51,7 @@ func take_damage(amount: int):
 func gain_xp(amount: int):
 	xp += amount
 
-	if xp >= xp_to_next_level:
+	while xp >= xp_to_next_level:
 		level_up()
 
 	emit_signal("xp_changed", xp, xp_to_next_level)
@@ -59,10 +60,9 @@ func gain_xp(amount: int):
 func level_up():
 	level += 1
 	xp = xp - xp_to_next_level
-	xp_to_next_level = int(100 * pow(level, 1.5))
+	xp_to_next_level = int(100 * pow(1.12, level - 1))
 
 	GlobalLogger.log("LEVELUP")
 
-	emit_signal("leveled_up", level)
-
+	leveled_up.emit(level)
 	
