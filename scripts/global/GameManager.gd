@@ -23,6 +23,11 @@ func _process(delta):
 	time_survived += delta
 
 
+func get_difficulty_multiplier() -> float:
+	var minutes = time_survived / 60.0
+	return 1.0 + (minutes * 0.3)
+
+
 func _on_game_over():
 	is_game_over = true
 	get_tree().paused = true

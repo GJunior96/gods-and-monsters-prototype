@@ -1,8 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://dkbapbpap7p5w"]
+[gd_scene load_steps=9 format=3 uid="uid://dkbapbpap7p5w"]
 
 [ext_resource type="PackedScene" uid="uid://bjcrg74hogbu2" path="res://scenes/player/player.tscn" id="1_ig7tw"]
 [ext_resource type="PackedScene" uid="uid://daw68dg1q7e2" path="res://scenes/enemies/enemy.tscn" id="3_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://df7ymvlu43of3" path="res://scenes/enemies/enemyFast.tscn" id="3_272bh"]
 [ext_resource type="PackedScene" uid="uid://7odmpbqt0146" path="res://scenes/ui/GameOverUI.tscn" id="4_1bvp3"]
+[ext_resource type="PackedScene" uid="uid://gx3ee0mq62ff" path="res://scenes/enemies/enemyTank.tscn" id="4_5vw27"]
 [ext_resource type="Script" uid="uid://coh3vo3ncnwe8" path="res://scripts/ui/xp_bar_ui.gd" id="5_7mycd"]
 [ext_resource type="PackedScene" uid="uid://ddayxe2ujmpub" path="res://scenes/systems/enemy_spawner.tscn" id="5_lquwl"]
 [ext_resource type="PackedScene" uid="uid://bcdx48b1luddu" path="res://scenes/ui/UpgradeUI.tscn" id="6_7mycd"]
@@ -14,12 +16,8 @@ position = Vector2(-20, -47)
 position = Vector2(260, 180)
 rotation = 3.1415927
 
-[node name="Enemy" parent="." node_paths=PackedStringArray("target") instance=ExtResource("3_1bvp3")]
-position = Vector2(26, 714)
-target = NodePath("../Player")
-
 [node name="EnemySpawner" parent="." instance=ExtResource("5_lquwl")]
-enemy_scene = ExtResource("3_1bvp3")
+enemy_scenes = Array[PackedScene]([ExtResource("3_1bvp3"), ExtResource("3_272bh"), ExtResource("4_5vw27")])
 
 [node name="GameOverUi" parent="." instance=ExtResource("4_1bvp3")]
 

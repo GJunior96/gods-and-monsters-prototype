@@ -1,23 +1,28 @@
-[gd_scene load_steps=6 format=3 uid="uid://daw68dg1q7e2"]
+[gd_scene load_steps=6 format=3 uid="uid://gx3ee0mq62ff"]
 
-[ext_resource type="Script" uid="uid://1v86vgsiwjba" path="res://scripts/enemies/enemy.gd" id="2_8e3ao"]
-[ext_resource type="Texture2D" uid="uid://bnld5m4s3fygx" path="res://sprites temporarios/square 16.png" id="2_38ino"]
-[ext_resource type="PackedScene" uid="uid://dkxmbst87rqvr" path="res://scenes/systems/XPDrop.tscn" id="2_fcftc"]
+[ext_resource type="Script" uid="uid://1v86vgsiwjba" path="res://scripts/enemies/enemy.gd" id="1_3l015"]
+[ext_resource type="PackedScene" uid="uid://dkxmbst87rqvr" path="res://scenes/systems/XPDrop.tscn" id="2_w40ce"]
+[ext_resource type="Texture2D" uid="uid://y8kt3rya1ace" path="res://sprites temporarios/enemytank.png" id="3_3l015"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_38ino"]
+radius = 15.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_fcftc"]
+radius = 15.0
 
 [node name="Enemy" type="CharacterBody2D" groups=["enemies"]]
 collision_layer = 4
 collision_mask = 2
-script = ExtResource("2_8e3ao")
-xp_drop_scene = ExtResource("2_fcftc")
-base_speed = 100.0
-base_damage = 20
+script = ExtResource("1_3l015")
+xp_drop_scene = ExtResource("2_w40ce")
+base_speed = 80.0
+base_damage = 25
+base_life = 90
+xp_value = 55
+min_spawn_time = 120.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_38ino")
+texture = ExtResource("3_3l015")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_38ino")

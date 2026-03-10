@@ -1,6 +1,9 @@
 extends Area2D
 
-@export var xp_value := 10
+var xp_value := 1
+
+func setup(value):
+	xp_value = value
 
 func _on_body_entered(body):
 	if body is Player:

@@ -1,11 +1,19 @@
 class_name Enemy
 extends CharacterBody2D
 
-@export var speed := 120.0
 @export var target: Node2D
-@export var life := 40
 @export var xp_drop_scene: PackedScene
+@export var base_speed := 120.0
+@export var base_damage := 15
+@export var base_life := 40
+@export var xp_value := 10
+@export var min_spawn_time := 0.0
+
+
 var dead := false
+var life
+var speed: float
+var damage
 
 func _physics_process(delta):
 	if dead or target == null:
@@ -15,10 +23,11 @@ func _physics_process(delta):
 	velocity = direction * speed
 	move_and_slide()
 
-	#for i in range(get_slide_collision_count()):
-	#	var collision = get_slide_collision(i)
-	#	if collision.get_collider().is_in_group("player"):
-	#		collision.get_collider().take_damage(10)
+
+func setup(difficulty_multiplier: float):
+	life = base_life * difficulty_multiplier
+	damage = base_damage * difficulty_multiplier
+	speed = base_speed * (1 + (difficulty_multiplier - 1) * 0.3)
 
 
 func take_damage(amount: int):
@@ -45,6 +54,7 @@ func die():
 		var xp = xp_drop_scene.instantiate()
 		get_tree().current_scene.add_child(xp)
 		xp.global_position = global_position
+		xp.setup(xp_value)
 
 	GlobalLogger.log("Freeing: " + name)
 	queue_free()
@@ -60,4 +70,4 @@ func _on_hitbox_area_entered(area):
 
 	if area.is_in_group("player_hurtbox"):
 		GlobalLogger.log("DAMAGEEEEEEE", GlobalLogger.LogLevel.WARN)
-		area.get_parent().take_damage(10)
+		area.get_parent().take_damage(damage)
