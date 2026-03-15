@@ -15,6 +15,11 @@ var life
 var speed: float
 var damage
 
+
+func _ready():
+	EnemyManager.register_enemy(self)
+
+
 func _physics_process(delta):
 	if dead or target == null:
 		return
@@ -57,6 +62,7 @@ func die():
 		xp.setup(xp_value)
 
 	GlobalLogger.log("Freeing: " + name)
+	EnemyManager.unregister_enemy(self)
 	queue_free()
 
 
@@ -69,5 +75,4 @@ func _on_hitbox_area_entered(area):
 		return
 
 	if area.is_in_group("player_hurtbox"):
-		GlobalLogger.log("DAMAGEEEEEEE", GlobalLogger.LogLevel.WARN)
 		area.get_parent().take_damage(damage)

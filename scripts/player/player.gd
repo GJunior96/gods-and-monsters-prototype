@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 @export var speed := 200.0
 @export var max_life := 100
+@export var starting_equipment: EquipmentData
 var life := max_life
 var damage_cooldown := 0.5
 var can_take_damage := true
@@ -10,16 +11,29 @@ var level: int = 1
 var xp: int = 0
 var xp_to_next_level: int = 20
 
-@onready var weapon = $Weapon
+@onready var weapon_slot = $WeaponSlot
 
 signal xp_changed(current, max)
 signal leveled_up(new_level)
 signal game_over
 
+# Refatoracao 
+signal on_attack
+signal on_kill
+signal on_damage_taken
+
+
+func _ready():
+	if starting_equipment:
+		equip_weapon(starting_equipment)
+
 
 func _physics_process(delta):
 
-	weapon.try_shoot()
+	if Input.is_action_pressed("attack"):
+		var weapon = weapon_slot.get_child(0)
+		if weapon:
+			weapon.try_attack()
 
 	var direction := Vector2.ZERO
 
@@ -32,12 +46,13 @@ func _physics_process(delta):
 
 func take_damage(amount: int):
 	if not can_take_damage:
-		GlobalLogger.log("Aguardando cooldown de dano...", GlobalLogger.LogLevel.WARN)
+		GlobalLogger.log("PLAYER damage cooldown", GlobalLogger.LogLevel.WARN)
 		return
 
 	can_take_damage = false
 
 	life -= amount
+	on_damage_taken.emit()
 	GlobalLogger.log("Player life: %s" % life)
 
 	if life <= 0:
@@ -66,3 +81,13 @@ func level_up():
 
 	leveled_up.emit(level)
 	
+
+func equip_weapon(data: EquipmentData) -> void:
+	if weapon_slot.get_child_count() > 0:
+		weapon_slot.get_child(0).queue_free()
+
+	var weapon = data.weapon_scene.instantiate()
+	weapon.data = data
+	weapon_slot.add_child(weapon)
+
+	weapon.setup(self)
