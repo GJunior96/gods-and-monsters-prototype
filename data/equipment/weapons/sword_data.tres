@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=6 format=3 uid="uid://sa73tsldjckv"]
+
+[ext_resource type="Script" uid="uid://crjms84mooixl" path="res://scripts/systems/combat/attacks/attack_pattern_melee.gd" id="1_my68t"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_rgl6o"]
+[ext_resource type="Script" uid="uid://bislmwbuulstf" path="res://scripts/resources/equipment/weapon_data.gd" id="3_pc32y"]
+[ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="4_rgl6o"]
+
+[sub_resource type="Resource" id="Resource_lexvb"]
+script = ExtResource("1_my68t")
+metadata/_custom_type_script = "uid://crjms84mooixl"
+
+[resource]
+script = ExtResource("3_pc32y")
+weapon_scene = ExtResource("4_rgl6o")
+attack_pattern = SubResource("Resource_lexvb")
+metadata/_custom_type_script = "uid://bislmwbuulstf"

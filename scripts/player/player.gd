@@ -11,13 +11,12 @@ var level: int = 1
 var xp: int = 0
 var xp_to_next_level: int = 20
 
-@onready var weapon_slot = $WeaponSlot
+#@onready var weapon_slot = $WeaponSlot
+@onready var equipment_manager = $EquipmentManager
 
 signal xp_changed(current, max)
 signal leveled_up(new_level)
 signal game_over
-
-# Refatoracao 
 signal on_attack
 signal on_kill
 signal on_damage_taken
@@ -25,16 +24,16 @@ signal on_damage_taken
 
 func _ready():
 	if starting_equipment:
-		equip_weapon(starting_equipment)
+		equip(starting_equipment)
 
 
 func _physics_process(delta):
 
-	if Input.is_action_pressed("attack"):
-		var weapon = weapon_slot.get_child(0)
-		if weapon:
-			weapon.try_attack()
+	handle_movement()
+	handle_attack()
 
+
+func handle_movement() -> void:
 	var direction := Vector2.ZERO
 
 	direction.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
@@ -43,6 +42,11 @@ func _physics_process(delta):
 	velocity = direction.normalized() * speed
 	move_and_slide()
 
+
+func handle_attack() -> void:
+	if Input.is_action_pressed("attack"):
+		equipment_manager.try_attack()
+		
 
 func take_damage(amount: int):
 	if not can_take_damage:
@@ -80,14 +84,7 @@ func level_up():
 	GlobalLogger.log("LEVELUP")
 
 	leveled_up.emit(level)
-	
 
-func equip_weapon(data: EquipmentData) -> void:
-	if weapon_slot.get_child_count() > 0:
-		weapon_slot.get_child(0).queue_free()
 
-	var weapon = data.weapon_scene.instantiate()
-	weapon.data = data
-	weapon_slot.add_child(weapon)
-
-	weapon.setup(self)
+func equip(data: EquipmentData) -> void:
+	equipment_manager.equip(data, self)

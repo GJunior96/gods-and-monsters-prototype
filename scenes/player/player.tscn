@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://bjcrg74hogbu2"]
+[gd_scene load_steps=9 format=3 uid="uid://bjcrg74hogbu2"]
 
 [ext_resource type="Script" uid="uid://n68w8i2nmcnq" path="res://scripts/player/player.gd" id="2_dovo2"]
 [ext_resource type="Texture2D" uid="uid://dkb7yd6mldmh1" path="res://sprites temporarios/square 24.png" id="2_lvxji"]
-[ext_resource type="Resource" uid="uid://sa73tsldjckv" path="res://data/configs/weapon/sword_data.tres" id="2_p47bc"]
-[ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/weapons/WeaponBase.tscn" id="3_75vfm"]
+[ext_resource type="Resource" uid="uid://sa73tsldjckv" path="res://data/equipment/weapons/sword_data.tres" id="2_p47bc"]
+[ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="3_75vfm"]
+[ext_resource type="Script" uid="uid://cs8xwh6gcprqm" path="res://scripts/systems/equipment/equipment_manager.gd" id="5_p47bc"]
+[ext_resource type="Script" uid="uid://c0sm2bon62rk1" path="res://scripts/systems/equipment/equipment_slot.gd" id="6_75vfm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_lvxji"]
 
@@ -24,7 +26,7 @@ shape = SubResource("CircleShape2D_lvxji")
 [node name="Camera2D" type="Camera2D" parent="."]
 position_smoothing_enabled = true
 
-[node name="WeaponBase" parent="." instance=ExtResource("3_75vfm")]
+[node name="Weapon" parent="." instance=ExtResource("3_75vfm")]
 
 [node name="HurtBox" type="Area2D" parent="." groups=["player_hurtbox"]]
 collision_layer = 8
@@ -33,8 +35,13 @@ collision_mask = 16
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
 shape = SubResource("CircleShape2D_p47bc")
 
-[node name="WeaponSlot" type="Node2D" parent="."]
+[node name="EquipmentManager" type="Node" parent="."]
+script = ExtResource("5_p47bc")
+metadata/_custom_type_script = "uid://cs8xwh6gcprqm"
 
-[node name="DefenseSlot" type="Node2D" parent="."]
+[node name="WeaponSlot" type="Node2D" parent="EquipmentManager"]
+script = ExtResource("6_75vfm")
 
-[node name="MagicSlot" type="Node2D" parent="."]
+[node name="DefenseSlot" type="Node2D" parent="EquipmentManager"]
+
+[node name="MagicSlot" type="Node2D" parent="EquipmentManager"]

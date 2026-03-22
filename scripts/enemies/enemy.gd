@@ -11,13 +11,16 @@ extends CharacterBody2D
 
 
 var dead := false
-var life
+var life: int
 var speed: float
-var damage
+var damage: int
 
 
 func _ready():
 	EnemyManager.register_enemy(self)
+
+	if life == 0:
+		setup(1.0)
 
 
 func _physics_process(delta):
@@ -30,8 +33,8 @@ func _physics_process(delta):
 
 
 func setup(difficulty_multiplier: float):
-	life = base_life * difficulty_multiplier
-	damage = base_damage * difficulty_multiplier
+	life = roundi(base_life * difficulty_multiplier)
+	damage = roundi(base_damage * difficulty_multiplier)
 	speed = base_speed * (1 + (difficulty_multiplier - 1) * 0.3)
 
 
@@ -40,7 +43,7 @@ func take_damage(amount: int):
 		return
 
 	life -= amount
-	GlobalLogger.log("Inimigo levou dano! Vida atual: %s" % life)
+	GlobalLogger.log("%s levou dano! Vida atual: %s" % [name,life])
 	if life <= 0:
 		die()
 
