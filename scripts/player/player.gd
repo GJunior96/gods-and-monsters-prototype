@@ -3,15 +3,15 @@ extends CharacterBody2D
 
 @export var speed := 200.0
 @export var max_life := 100
-@export var starting_equipment: EquipmentData
+#@export var starting_equipment: EquipmentData
 var life := max_life
 var damage_cooldown := 0.5
 var can_take_damage := true
 var level: int = 1
 var xp: int = 0
 var xp_to_next_level: int = 20
+@export var starting_equipment_id: String
 
-#@onready var weapon_slot = $WeaponSlot
 @onready var equipment_manager = $EquipmentManager
 
 signal xp_changed(current, max)
@@ -23,8 +23,10 @@ signal on_damage_taken
 
 
 func _ready():
-	if starting_equipment:
-		equip(starting_equipment)
+	var equipment_data = ItemDatabase.get_item(starting_equipment_id)
+	equip(equipment_data)
+	#if starting_equipment:
+	#	equip(starting_equipment)
 
 
 func _physics_process(delta):
@@ -45,7 +47,7 @@ func handle_movement() -> void:
 
 func handle_attack() -> void:
 	if Input.is_action_pressed("attack"):
-		equipment_manager.try_attack()
+		EventBus.attack_requested.emit()
 		
 
 func take_damage(amount: int):

@@ -9,6 +9,8 @@ extends Node
 var slots: Dictionary[SlotType.Type, EquipmentSlot] = {}
 
 func _ready():
+	EventBus.attack_requested.connect(_on_attack_requested)
+
 	slots[SlotType.Type.WEAPON] = $WeaponSlot
 	#slots["defense"] = $DefenseSlot
 	#slots["magic"] = $MagicSlot
@@ -21,6 +23,6 @@ func equip(data: EquipmentData, player) -> void:
 	slot.equip(equipment)
 
 
-func try_attack() -> void:
+func _on_attack_requested() -> void:
 	if weapon_slot.current_equipment:
 		weapon_slot.current_equipment.try_attack()

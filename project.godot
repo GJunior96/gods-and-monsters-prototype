@@ -20,6 +20,8 @@ config/icon="res://icon.svg"
 GlobalLogger="*res://scripts/global/logger.gd"
 GameManager="*res://scripts/global/game_manager.gd"
 EnemyManager="*res://scripts/global/enemy_manager.gd"
+EventBus="*res://scripts/global/events/event_bus.gd"
+ItemDatabase="*res://scripts/global/item_database.gd"
 
 [display]
 

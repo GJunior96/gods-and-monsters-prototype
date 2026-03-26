@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://bjcrg74hogbu2"]
+[gd_scene load_steps=8 format=3 uid="uid://bjcrg74hogbu2"]
 
 [ext_resource type="Script" uid="uid://n68w8i2nmcnq" path="res://scripts/player/player.gd" id="2_dovo2"]
 [ext_resource type="Texture2D" uid="uid://dkb7yd6mldmh1" path="res://sprites temporarios/square 24.png" id="2_lvxji"]
-[ext_resource type="Resource" uid="uid://sa73tsldjckv" path="res://data/equipment/weapons/sword_data.tres" id="2_p47bc"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="3_75vfm"]
 [ext_resource type="Script" uid="uid://cs8xwh6gcprqm" path="res://scripts/systems/equipment/equipment_manager.gd" id="5_p47bc"]
 [ext_resource type="Script" uid="uid://c0sm2bon62rk1" path="res://scripts/systems/equipment/equipment_slot.gd" id="6_75vfm"]
@@ -15,7 +14,7 @@ radius = 12.0
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_mask = 2
 script = ExtResource("2_dovo2")
-starting_equipment = ExtResource("2_p47bc")
+starting_equipment_id = "weapon_sword_basic"
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_lvxji")

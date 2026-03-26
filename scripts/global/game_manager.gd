@@ -16,6 +16,7 @@ func _ready():
 	upgrade_ui.upgrade_finished.connect(_on_upgrade_finished)
 	game_over_iu.restart_game.connect(_on_restart_game)
 
+
 func _process(delta):
 	if is_game_over:
 		return
