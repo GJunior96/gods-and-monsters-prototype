@@ -14,9 +14,12 @@ func _process(delta) -> void:
 		return
 
 	if auto_aim:
-		var target = get_closest_enemy()
-		if target:
-			look_at(target.global_position)
+		var dir = player.attack_direction
+		if dir:
+			look_at(dir)
+		#var target = get_closest_enemy()
+		#if target:
+		#	look_at(target.global_position)
 
 
 func try_attack() -> void:
@@ -30,6 +33,8 @@ func try_attack() -> void:
 
 	final_data.attack_pattern.execute(self, player, final_data)
 
+
+	player.update_target()
 	player.on_attack.emit()
 
 	can_attack = false

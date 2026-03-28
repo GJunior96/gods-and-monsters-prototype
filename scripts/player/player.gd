@@ -1,18 +1,29 @@
 class_name Player
 extends CharacterBody2D
 
+@onready var equipment_manager = $EquipmentManager
+
 @export var speed := 200.0
 @export var max_life := 100
-#@export var starting_equipment: EquipmentData
+@export var starting_equipment_id: String
+
 var life := max_life
 var damage_cooldown := 0.5
 var can_take_damage := true
 var level: int = 1
 var xp: int = 0
 var xp_to_next_level: int = 20
-@export var starting_equipment_id: String
 
-@onready var equipment_manager = $EquipmentManager
+# targeting vars
+@export var target_update_interval := 0.2
+var _target_timer := 0.0
+var current_target: Node2D
+var attack_direction: Vector2 = Vector2.RIGHT
+
+# weapon draw vars
+var show_attack_debug := true
+var attack_range
+var attack_radius
 
 signal xp_changed(current, max)
 signal leveled_up(new_level)
@@ -24,15 +35,69 @@ signal on_damage_taken
 
 func _ready():
 	var equipment_data = ItemDatabase.get_item(starting_equipment_id)
+
+	attack_range = equipment_data.range
+	attack_radius = equipment_data.attack_radius
+
 	equip(equipment_data)
-	#if starting_equipment:
-	#	equip(starting_equipment)
+
+	print("range:", attack_range)
+	print("dir:", attack_direction)
+	print("dir length:", attack_direction.length())
+
+
+func _process(delta):
+	_target_timer += delta
+
+	if _target_timer >= target_update_interval:
+		update_target()
+		_target_timer = 0.0
+
+	if show_attack_debug:
+		queue_redraw()
 
 
 func _physics_process(delta):
 
 	handle_movement()
 	handle_attack()
+
+
+func update_target():
+	current_target = TargetingUtils._get_nearest_enemy(global_position)
+
+	if current_target:
+		attack_direction = TargetingUtils.get_direction(current_target.global_position, global_position)
+
+
+func _draw():
+	if not show_attack_debug and not attack_range and not attack_radius and not attack_direction:
+		return
+
+	# Range
+	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.2))
+
+	# Cone
+	_draw_attack_cone()
+
+
+
+func _draw_attack_cone():
+	var points = []
+	points.append(Vector2.ZERO)
+
+	var half_angle = deg_to_rad(attack_radius / 2.0)
+	var dir_angle = attack_direction.angle()
+
+	var steps = 20
+
+	for i in range(steps + 1):
+		var t = lerp(-half_angle, half_angle, i / float(steps))
+		var angle = dir_angle + t
+		var point = Vector2(cos(angle), sin(angle)) * attack_range
+		points.append(point)
+
+	draw_colored_polygon(points, Color(1, 1, 0, 0.3))
 
 
 func handle_movement() -> void:
