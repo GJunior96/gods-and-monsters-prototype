@@ -6,7 +6,7 @@ extends EquipmentBase
 
 var can_attack := true
 
-func _process(delta) -> void:
+func _process(_delta) -> void:
 	if player:
 		global_position = player.global_position
 		
@@ -43,18 +43,18 @@ func try_attack() -> void:
 	can_attack = true
 
 
-func get_closest_enemy():
-	if not data:
-		return null
+# func get_closest_enemy():
+# 	if not data:
+# 		return null
 
-	var enemies = EnemyManager.enemies
-	var closest = null
-	var min_dist = data.range
+# 	var enemies = EnemyManager.enemies
+# 	var closest = null
+# 	var min_dist = data.range
 
-	for enemy in enemies:
-		var dist = global_position.distance_to(enemy.global_position)
-		if dist < min_dist:
-			min_dist = dist
-			closest = enemy
+# 	for enemy in enemies:
+# 		var dist = global_position.distance_to(enemy.global_position)
+# 		if dist < min_dist:
+# 			min_dist = dist
+# 			closest = enemy
 
-	return closest
+# 	return closest

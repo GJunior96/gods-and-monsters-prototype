@@ -24,6 +24,8 @@ var attack_direction: Vector2 = Vector2.RIGHT
 var show_attack_debug := true
 var attack_range
 var attack_radius
+var attack_thickness
+var attack_angle
 
 signal xp_changed(current, max)
 signal leveled_up(new_level)
@@ -32,18 +34,17 @@ signal on_attack
 signal on_kill
 signal on_damage_taken
 
-
+ 
 func _ready():
 	var equipment_data = ItemDatabase.get_item(starting_equipment_id)
 
-	attack_range = equipment_data.range
-	attack_radius = equipment_data.attack_radius
+	# attack_range = equipment_data.attack_range
+	# attack_radius = equipment_data.shape.radius
+	# attack_thickness = equipment_data.shape.thickness
+	# attack_angle = equipment_data.shape.angle
+
 
 	equip(equipment_data)
-
-	print("range:", attack_range)
-	print("dir:", attack_direction)
-	print("dir length:", attack_direction.length())
 
 
 func _process(delta):
@@ -53,11 +54,11 @@ func _process(delta):
 		update_target()
 		_target_timer = 0.0
 
-	if show_attack_debug:
-		queue_redraw()
+	# if show_attack_debug:
+	# 	queue_redraw()
 
 
-func _physics_process(delta):
+func _physics_process(_delta):
 
 	handle_movement()
 	handle_attack()
@@ -70,34 +71,28 @@ func update_target():
 		attack_direction = TargetingUtils.get_direction(current_target.global_position, global_position)
 
 
-func _draw():
-	if not show_attack_debug and not attack_range and not attack_radius and not attack_direction:
-		return
+# func _draw():
+# 	if not show_attack_debug and not attack_range and not attack_radius and not attack_direction:
+# 		return
 
-	# Range
-	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.2))
+# 	var base_points = ShapeUtils.arc(attack_radius, attack_thickness, attack_angle, 12)
+# 	var rotated_points := []
 
-	# Cone
-	_draw_attack_cone()
+# 	var rot = attack_direction.angle()
+
+# 	for point in base_points:
+# 		rotated_points.append(point.rotated(rot))
+
+# 	draw_polygon(rotated_points, [Color("#ffd90080")])
+
+# 	draw_line(Vector2.ZERO, attack_direction * attack_range, Color.GREEN, 3) # direcao do ataque
+# 	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.2)) # range do ataque
 
 
 
-func _draw_attack_cone():
-	var points = []
-	points.append(Vector2.ZERO)
-
-	var half_angle = deg_to_rad(attack_radius / 2.0)
-	var dir_angle = attack_direction.angle()
-
-	var steps = 20
-
-	for i in range(steps + 1):
-		var t = lerp(-half_angle, half_angle, i / float(steps))
-		var angle = dir_angle + t
-		var point = Vector2(cos(angle), sin(angle)) * attack_range
-		points.append(point)
-
-	draw_colored_polygon(points, Color(1, 1, 0, 0.3))
+# func _draw_attack_cone():
+# 	var points = ShapeUtils.arc(attack_radius, attack_thickness, attack_angle, 12)
+# 	#draw_colored_polygon(points, attack_direction, Color(1, 1, 0, 0.3))
 
 
 func handle_movement() -> void:

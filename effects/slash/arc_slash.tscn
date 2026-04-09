@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://c6m2m5mov0tcc"]
+
+[ext_resource type="Script" uid="uid://do4cd8rowawb8" path="res://effects/slash/arc_slash.gd" id="1_urlpw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_urlpw"]
+
+[node name="ArcSlash" type="Node2D"]
+script = ExtResource("1_urlpw")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 16
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D"]
+
+[node name="InnerArea2D" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InnerArea2D"]
+shape = SubResource("CircleShape2D_urlpw")
+
+[connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]
+[connection signal="area_entered" from="InnerArea2D" to="." method="_on_inner_area_2d_area_entered"]

@@ -1,0 +1,553 @@
+===== ESTRUTURA DE PASTAS =====
+.
+├── data
+│   └── equipment
+│       └── weapons
+│           └── sword_data.tres
+├── effects
+│   └── slash
+│       ├── arc_slash.gd
+│       ├── arc_slash.gd.uid
+│       └── arc_slash.tscn
+├── icon.svg
+├── icon.svg.import
+├── main.tscn
+├── project.godot
+├── project_context.txt
+├── scenes
+│   ├── enemies
+│   │   ├── enemy.tscn
+│   │   ├── enemyFast.tscn
+│   │   └── enemyTank.tscn
+│   ├── equipment
+│   │   └── Weapon.tscn
+│   ├── player
+│   │   └── player.tscn
+│   ├── systems
+│   │   ├── XPDrop.tscn
+│   │   └── enemy_spawner.tscn
+│   └── ui
+│       ├── GameOverUI.tscn
+│       └── UpgradeUI.tscn
+├── scripts
+│   ├── enemies
+│   │   ├── enemy.gd
+│   │   └── enemy.gd.uid
+│   ├── global
+│   │   ├── enemy_manager.gd
+│   │   ├── enemy_manager.gd.uid
+│   │   ├── events
+│   │   │   ├── event_bus.gd
+│   │   │   └── event_bus.gd.uid
+│   │   ├── game_manager.gd
+│   │   ├── game_manager.gd.uid
+│   │   ├── item_database.gd
+│   │   ├── item_database.gd.uid
+│   │   ├── logger.gd
+│   │   └── logger.gd.uid
+│   ├── player
+│   │   ├── player.gd
+│   │   └── player.gd.uid
+│   ├── resources
+│   │   ├── equipment
+│   │   │   ├── equipment_data.gd
+│   │   │   ├── equipment_data.gd.uid
+│   │   │   ├── item_database_data.gd
+│   │   │   ├── item_database_data.gd.uid
+│   │   │   ├── weapon_data.gd
+│   │   │   └── weapon_data.gd.uid
+│   │   └── shapes
+│   │       ├── arc_shape.gd
+│   │       ├── arc_shape.gd.uid
+│   │       ├── shape_data.gd
+│   │       └── shape_data.gd.uid
+│   ├── systems
+│   │   ├── combat
+│   │   │   ├── attacks
+│   │   │   │   ├── attack_pattern.gd
+│   │   │   │   ├── attack_pattern.gd.uid
+│   │   │   │   ├── attack_pattern_melee.gd
+│   │   │   │   ├── attack_pattern_melee.gd.uid
+│   │   │   │   ├── attack_pattern_projectile.gd
+│   │   │   │   └── attack_pattern_projectile.gd.uid
+│   │   │   └── modifiers
+│   │   │       ├── area_modifier.gd
+│   │   │       ├── area_modifier.gd.uid
+│   │   │       ├── attack_modifier.gd
+│   │   │       ├── attack_modifier.gd.uid
+│   │   │       ├── cooldown_modifier.gd
+│   │   │       ├── cooldown_modifier.gd.uid
+│   │   │       ├── damage_modifier.gd
+│   │   │       └── damage_modifier.gd.uid
+│   │   ├── enemy_spawner.gd
+│   │   ├── enemy_spawner.gd.uid
+│   │   ├── equipment
+│   │   │   ├── equipment_base.gd
+│   │   │   ├── equipment_base.gd.uid
+│   │   │   ├── equipment_manager.gd
+│   │   │   ├── equipment_manager.gd.uid
+│   │   │   ├── equipment_slot.gd
+│   │   │   ├── equipment_slot.gd.uid
+│   │   │   ├── equipment_type.gd
+│   │   │   ├── equipment_type.gd.uid
+│   │   │   ├── slot_type.gd
+│   │   │   ├── slot_type.gd.uid
+│   │   │   ├── weapon_base.gd
+│   │   │   └── weapon_base.gd.uid
+│   │   ├── targeting
+│   │   │   ├── targeting_utils.gd
+│   │   │   └── targeting_utils.gd.uid
+│   │   ├── xp_drop.gd
+│   │   └── xp_drop.gd.uid
+│   ├── ui
+│   │   ├── game_over_ui.gd
+│   │   ├── game_over_ui.gd.uid
+│   │   ├── upgrade_ui.gd
+│   │   ├── upgrade_ui.gd.uid
+│   │   ├── xp_bar_ui.gd
+│   │   └── xp_bar_ui.gd.uid
+│   └── utils
+│       ├── shape_utils.gd
+│       └── shape_utils.gd.uid
+└── sprites temporarios
+    ├── circle 8.png
+    ├── circle 8.png.import
+    ├── enemyfast.png
+    ├── enemyfast.png.import
+    ├── enemytank.png
+    ├── enemytank.png.import
+    ├── inimigo 32.png:Zone.Identifier
+    ├── player 64.png:Zone.Identifier
+    ├── projetil 8.png:Zone.Identifier
+    ├── square 16 blue.png
+    ├── square 16 blue.png.import
+    ├── square 16.png
+    ├── square 16.png.import
+    ├── square 24.png
+    ├── square 24.png.import
+    ├── square 32.png
+    ├── square 32.png.import
+    ├── square 64.png
+    ├── square 64.png.import
+    └── —Pngtree—circle clipart purple circle_5553138.png:Zone.Identifier
+
+29 directories, 102 files
+
+
+
+===== ARQUIVOS EXPORTADOS =====
+====================================
+Arquivo: ./scripts/utils/shape_utils.gd
+Tipo: SCRIPT
+====================================
+class_name ShapeUtils
+
+static func arc(radius: float, thickness: float, angle: float, steps := 12) -> PackedVector2Array:
+	var points := []
+
+	var start_angle = deg_to_rad(-angle / 2)
+	var end_angle = deg_to_rad(angle / 2)
+
+	# outer
+	for i in range(steps + 1):
+		var t = i / float(steps)
+		var a = lerp(start_angle, end_angle, t)
+
+		#var outer = Vector2(cos(a), -sin(a)) * radius
+		#points.append(outer)
+
+		var dir = Vector2(cos(a), sin(a))
+
+		var taper = sin(t * PI) # taper de 0 a 1 a 0 para criar um efeito de "afunilamento" no início e fim do arco
+		var offset = thickness * (1.0 - taper) * 0.5 # offset para manter o centro do arco consistente
+
+		points.append(dir * (radius - offset))
+
+	for i in range(steps, -1, -1):
+		var t = i / float(steps)
+		var a = lerp(start_angle, end_angle, t)
+
+		#var inner = Vector2(cos(a), sin(a)) * (radius - thickness)
+		#points.append(inner)
+		
+		var dir = Vector2(cos(a), sin(a))
+
+		var taper = sin(t * PI) # mesmo taper para a parte interna
+		#var current_thickness = thickness * taper
+		var offset = thickness * (1.0 - taper) * 0.5 # mesmo offset para manter o centro consistente
+
+		points.append(dir * (radius - thickness + offset))
+
+
+	return points
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/systems/equipment/weapon_base.gd
+Tipo: SCRIPT
+====================================
+class_name WeaponBase
+extends EquipmentBase
+
+#@export var data: WeaponData
+@export var auto_aim := true
+
+var can_attack := true
+
+func _process(_delta) -> void:
+	if player:
+		global_position = player.global_position
+		
+	if not data:
+		return
+
+	if auto_aim:
+		var dir = player.attack_direction
+		if dir:
+			look_at(dir)
+		#var target = get_closest_enemy()
+		#if target:
+		#	look_at(target.global_position)
+
+
+func try_attack() -> void:
+	if not can_attack:
+		return
+
+	var final_data = data.duplicate()
+
+	for modifier in data.modifiers:
+		modifier.apply(final_data)
+
+	final_data.attack_pattern.execute(self, player, final_data)
+
+
+	player.update_target()
+	player.on_attack.emit()
+
+	can_attack = false
+	await get_tree().create_timer(final_data.cooldown).timeout
+
+	can_attack = true
+
+
+# func get_closest_enemy():
+# 	if not data:
+# 		return null
+
+# 	var enemies = EnemyManager.enemies
+# 	var closest = null
+# 	var min_dist = data.range
+
+# 	for enemy in enemies:
+# 		var dist = global_position.distance_to(enemy.global_position)
+# 		if dist < min_dist:
+# 			min_dist = dist
+# 			closest = enemy
+
+# 	return closest
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/systems/combat/attacks/attack_pattern_melee.gd
+Tipo: SCRIPT
+====================================
+class_name MeleeAttack
+extends AttackPattern
+
+
+func execute(equipment, player, data):
+	var slash = preload("res://effects/slash/arc_slash.tscn").instantiate()
+	var attack_instance = data.weapon_scene.instantiate()
+	var forward = player.attack_direction.normalized()
+	var shape = player.get_node("CollisionShape2D").shape
+
+	var radius = 0.0
+	player.get_parent().add_child(attack_instance)
+
+	if shape is RectangleShape2D:
+		radius = shape.size.x / 2
+	elif shape is CircleShape2D:
+		radius = shape.radius
+	attack_instance.global_position = player.global_position
+	attack_instance.setup(forward, data)
+	attack_instance.hit_detected.connect(func(targets): _apply_damage(targets, data))
+
+
+func _apply_damage(targets, data):
+	for enemy in targets:
+		enemy.take_damage(data.damage)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/resources/shapes/shape_data.gd
+Tipo: SCRIPT
+====================================
+class_name ShapeData
+extends Resource
+
+func generate() -> PackedVector2Array:
+	return PackedVector2Array()
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/resources/shapes/arc_shape.gd
+Tipo: SCRIPT
+====================================
+class_name ArcShapeData
+extends ShapeData
+
+@export var radius: float = 50
+@export var thickness: float = 12
+@export var angle: float = 90
+
+func generate() -> PackedVector2Array:
+	return ShapeUtils.arc(radius, thickness, angle)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/resources/equipment/weapon_data.gd
+Tipo: SCRIPT
+====================================
+class_name WeaponData
+extends EquipmentData
+
+@export var weapon_scene: PackedScene
+@export var attack_pattern: AttackPattern
+
+@export var damage: int = 10
+@export var cooldown: float = 0.5
+@export var attack_range: float = 80
+@export var attack_duration: float = 0.12
+@export var modifiers: Array[AttackModifier]
+
+# Slash
+# @export var slash_radius: float = 50.0
+# @export var slash_thickness: float = 12.0
+# @export var slash_angle: float = 90.0
+
+@export var swing_angle: float = 90.0
+@export var hit_start: float = 0.4
+@export var hit_end: float = 0.6
+@export var shape: ShapeData
+
+@export var projectile_scene: PackedScene
+
+
+func create_instance(player) -> EquipmentBase:
+	var weapon: WeaponBase = weapon_scene.instantiate()
+	weapon.setup(player, self)
+	return weapon
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/player/player.gd
+Tipo: SCRIPT
+====================================
+class_name Player
+extends CharacterBody2D
+
+@onready var equipment_manager = $EquipmentManager
+
+@export var speed := 200.0
+@export var max_life := 100
+@export var starting_equipment_id: String
+
+var life := max_life
+var damage_cooldown := 0.5
+var can_take_damage := true
+var level: int = 1
+var xp: int = 0
+var xp_to_next_level: int = 20
+
+# targeting vars
+@export var target_update_interval := 0.2
+var _target_timer := 0.0
+var current_target: Node2D
+var attack_direction: Vector2 = Vector2.RIGHT
+
+# weapon draw vars
+var show_attack_debug := true
+var attack_range
+var attack_radius
+var attack_thickness
+var attack_angle
+
+signal xp_changed(current, max)
+signal leveled_up(new_level)
+signal game_over
+signal on_attack
+signal on_kill
+signal on_damage_taken
+
+ 
+func _ready():
+	var equipment_data = ItemDatabase.get_item(starting_equipment_id)
+
+	# attack_range = equipment_data.attack_range
+	# attack_radius = equipment_data.shape.radius
+	# attack_thickness = equipment_data.shape.thickness
+	# attack_angle = equipment_data.shape.angle
+
+
+	equip(equipment_data)
+
+
+func _process(delta):
+	_target_timer += delta
+
+	if _target_timer >= target_update_interval:
+		update_target()
+		_target_timer = 0.0
+
+	# if show_attack_debug:
+	# 	queue_redraw()
+
+
+func _physics_process(_delta):
+
+	handle_movement()
+	handle_attack()
+
+
+func update_target():
+	current_target = TargetingUtils._get_nearest_enemy(global_position)
+
+	if current_target:
+		attack_direction = TargetingUtils.get_direction(current_target.global_position, global_position)
+
+
+# func _draw():
+# 	if not show_attack_debug and not attack_range and not attack_radius and not attack_direction:
+# 		return
+
+# 	var base_points = ShapeUtils.arc(attack_radius, attack_thickness, attack_angle, 12)
+# 	var rotated_points := []
+
+# 	var rot = attack_direction.angle()
+
+# 	for point in base_points:
+# 		rotated_points.append(point.rotated(rot))
+
+# 	draw_polygon(rotated_points, [Color("#ffd90080")])
+
+# 	draw_line(Vector2.ZERO, attack_direction * attack_range, Color.GREEN, 3) # direcao do ataque
+# 	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.2)) # range do ataque
+
+
+
+# func _draw_attack_cone():
+# 	var points = ShapeUtils.arc(attack_radius, attack_thickness, attack_angle, 12)
+# 	#draw_colored_polygon(points, attack_direction, Color(1, 1, 0, 0.3))
+
+
+func handle_movement() -> void:
+	var direction := Vector2.ZERO
+
+	direction.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
+	direction.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
+
+	velocity = direction.normalized() * speed
+	move_and_slide()
+
+
+func handle_attack() -> void:
+	if Input.is_action_pressed("attack"):
+		EventBus.attack_requested.emit()
+		
+
+func take_damage(amount: int):
+	if not can_take_damage:
+		GlobalLogger.log("PLAYER damage cooldown", GlobalLogger.LogLevel.WARN)
+		return
+
+	can_take_damage = false
+
+	life -= amount
+	on_damage_taken.emit()
+	GlobalLogger.log("Player life: %s" % life)
+
+	if life <= 0:
+		game_over.emit()
+		queue_free()
+
+	await get_tree().create_timer(damage_cooldown).timeout
+	can_take_damage = true
+
+
+func gain_xp(amount: int):
+	xp += amount
+
+	while xp >= xp_to_next_level:
+		level_up()
+
+	emit_signal("xp_changed", xp, xp_to_next_level)
+
+
+func level_up():
+	level += 1
+	xp = xp - xp_to_next_level
+	xp_to_next_level = int(100 * pow(1.12, level - 1))
+
+	GlobalLogger.log("LEVELUP")
+
+	leveled_up.emit(level)
+
+
+func equip(data: EquipmentData) -> void:
+	equipment_manager.equip(data, self)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./effects/slash/arc_slash.tscn
+Tipo: SCENE
+====================================
+[gd_scene load_steps=3 format=3 uid="uid://c6m2m5mov0tcc"]
+
+[ext_resource type="Script" uid="uid://do4cd8rowawb8" path="res://effects/slash/arc_slash.gd" id="1_urlpw"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_urlpw"]
+
+[node name="ArcSlash" type="Node2D"]
+script = ExtResource("1_urlpw")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 16
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D"]
+
+[node name="InnerArea2D" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 16
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InnerArea2D"]
+shape = SubResource("CircleShape2D_urlpw")
+
+[connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]
+[connection signal="area_entered" from="InnerArea2D" to="." method="_on_inner_area_2d_area_entered"]
+
+
+===== FIM DO ARQUIVO =====
+
+
