@@ -20,7 +20,7 @@ var _time := 0.0
 var _start_rotation := 0.0
 var base_rotation := 0.0
 var _hit_active := false
-var _already_hit := {}
+#var _already_hit := {}
 
 signal hit_detected(targets: Array)
 
@@ -92,7 +92,7 @@ func setup(direction: Vector2, weapon_data: WeaponData) -> void:
 	collision.polygon = data.shape.generate()
 	_start_rotation = -deg_to_rad(swing_angle / 2)
 
-	var inner_radius = radius - thickness
+	var inner_radius = data.shape.get_inner_radius()
 	var col = inner_area.get_node("CollisionShape2D")
 
 	if col.shape:
@@ -109,12 +109,12 @@ func _set_hit_active(active: bool) -> void:
 		inner_area.monitoring = active
 
 
-func _try_hit(target) -> void:
-	if _already_hit.has(target):
-		return
+# func _try_hit(target) -> void:
+# 	if _already_hit.has(target):
+# 		return
 
-	_already_hit[target] = true
-	hit_detected.emit([target])
+# 	_already_hit[target] = true
+# 	hit_detected.emit([target])
 
 
 func _generate_arc_points() -> PackedVector2Array:
@@ -150,7 +150,8 @@ func _on_area_2d_area_entered(area: Area2D) -> void:
 	var enemy = area.get_parent()
 
 	if enemy is Enemy:
-		_try_hit(enemy)
+		#_try_hit(enemy)
+		hit_detected.emit([enemy])
 
 
 func _on_inner_area_2d_area_entered(area: Area2D) -> void:
@@ -159,5 +160,6 @@ func _on_inner_area_2d_area_entered(area: Area2D) -> void:
 
 	var enemy = area.get_parent()
 
-	if enemy is Enemy and not _already_hit.has(enemy):
-		_try_hit(enemy)
+	if enemy is Enemy: # and not _already_hit.has(enemy):
+		#_try_hit(enemy)
+		hit_detected.emit([enemy])

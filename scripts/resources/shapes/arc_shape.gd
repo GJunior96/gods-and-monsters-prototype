@@ -7,3 +7,6 @@ extends ShapeData
 
 func generate() -> PackedVector2Array:
 	return ShapeUtils.arc(radius, thickness, angle)
+
+func get_inner_radius() -> float:
+	return radius - thickness
