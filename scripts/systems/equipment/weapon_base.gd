@@ -31,7 +31,9 @@ func try_attack() -> void:
 	for modifier in data.modifiers:
 		modifier.apply(final_data)
 
-	final_data.attack_pattern.execute(self, player, final_data)
+	var attack = final_data.attacks[0] # TODO: select attack based on pattern
+
+	final_data.attack_pattern.execute(self, player, attack)
 
 
 	player.update_target()

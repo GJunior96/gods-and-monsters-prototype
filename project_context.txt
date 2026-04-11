@@ -274,28 +274,37 @@ Tipo: SCRIPT
 class_name MeleeAttack
 extends AttackPattern
 
+var _already_hit = {}
 
-func execute(equipment, player, data):
-	#var slash = preload("res://effects/slash/arc_slash.tscn").instantiate()
+func execute(_equipment, player, data):
+	_already_hit.clear()
+
 	var attack_instance = data.attack_scene.instantiate()
 	var forward = player.attack_direction.normalized()
-	#var shape = player.get_node("CollisionShape2D").shape
 
-	#var radius = 0.0
 	player.get_parent().add_child(attack_instance)
 
-	# if shape is RectangleShape2D:
-	# 	radius = shape.size.x / 2
-	# elif shape is CircleShape2D:
-	# 	radius = shape.radius
+
 	attack_instance.global_position = player.global_position
 	attack_instance.setup(forward, data)
-	attack_instance.hit_detected.connect(func(targets): _apply_damage(targets, data))
-
+	attack_instance.hit_detected.connect(_on_hit_detected.bind(data))
 
 func _apply_damage(targets, data):
 	for enemy in targets:
 		enemy.take_damage(data.damage)
+
+
+func _on_hit_detected(targets: Array, data: WeaponData) -> void:
+	var valid_targets = []
+	for target in targets:
+		if _already_hit.has(target):
+			continue
+		
+		_already_hit[target] = true
+		valid_targets.append(target)
+
+	if valid_targets.size() > 0:
+		_apply_damage(valid_targets, data)
 
 
 ===== FIM DO ARQUIVO =====
@@ -311,6 +320,8 @@ extends Resource
 func generate() -> PackedVector2Array:
 	return PackedVector2Array()
 
+func get_inner_radius() -> float:
+	return 0.0
 
 ===== FIM DO ARQUIVO =====
 
@@ -328,6 +339,9 @@ extends ShapeData
 
 func generate() -> PackedVector2Array:
 	return ShapeUtils.arc(radius, thickness, angle)
+
+func get_inner_radius() -> float:
+	return radius - thickness
 
 
 ===== FIM DO ARQUIVO =====
@@ -534,22 +548,6 @@ func equip(data: EquipmentData) -> void:
 
 
 ====================================
-Arquivo: ./scripts/global/events/event_bus.gd
-Tipo: SCRIPT
-====================================
-extends Node
-
-
-signal attack_requested
-signal damage_taken(target, amount)
-signal enemy_killed(enemy)
-signal equipment_quipped(equipment)
-
-
-===== FIM DO ARQUIVO =====
-
-
-====================================
 Arquivo: ./scenes/equipment/Weapon.tscn
 Tipo: SCENE
 ====================================
@@ -623,7 +621,7 @@ var _time := 0.0
 var _start_rotation := 0.0
 var base_rotation := 0.0
 var _hit_active := false
-var _already_hit := {}
+#var _already_hit := {}
 
 signal hit_detected(targets: Array)
 
@@ -695,7 +693,7 @@ func setup(direction: Vector2, weapon_data: WeaponData) -> void:
 	collision.polygon = data.shape.generate()
 	_start_rotation = -deg_to_rad(swing_angle / 2)
 
-	var inner_radius = radius - thickness
+	var inner_radius = data.shape.get_inner_radius()
 	var col = inner_area.get_node("CollisionShape2D")
 
 	if col.shape:
@@ -712,12 +710,12 @@ func _set_hit_active(active: bool) -> void:
 		inner_area.monitoring = active
 
 
-func _try_hit(target) -> void:
-	if _already_hit.has(target):
-		return
+# func _try_hit(target) -> void:
+# 	if _already_hit.has(target):
+# 		return
 
-	_already_hit[target] = true
-	hit_detected.emit([target])
+# 	_already_hit[target] = true
+# 	hit_detected.emit([target])
 
 
 func _generate_arc_points() -> PackedVector2Array:
@@ -753,7 +751,8 @@ func _on_area_2d_area_entered(area: Area2D) -> void:
 	var enemy = area.get_parent()
 
 	if enemy is Enemy:
-		_try_hit(enemy)
+		#_try_hit(enemy)
+		hit_detected.emit([enemy])
 
 
 func _on_inner_area_2d_area_entered(area: Area2D) -> void:
@@ -762,8 +761,9 @@ func _on_inner_area_2d_area_entered(area: Area2D) -> void:
 
 	var enemy = area.get_parent()
 
-	if enemy is Enemy and not _already_hit.has(enemy):
-		_try_hit(enemy)
+	if enemy is Enemy: # and not _already_hit.has(enemy):
+		#_try_hit(enemy)
+		hit_detected.emit([enemy])
 
 
 ===== FIM DO ARQUIVO =====

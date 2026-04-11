@@ -1,5 +1,5 @@
 class_name AttackPattern
 extends Resource
 
-func execute(equipment, player, data):
+func execute(equipment, player, attack: AttackData):
 	pass

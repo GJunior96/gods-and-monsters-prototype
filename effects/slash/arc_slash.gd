@@ -14,22 +14,17 @@ var thickness
 var angle
 var swing_angle
 
-var data: WeaponData
+var data: AttackData
 
 var _time := 0.0
 var _start_rotation := 0.0
 var base_rotation := 0.0
 var _hit_active := false
-#var _already_hit := {}
 
 signal hit_detected(targets: Array)
 
 
 func _ready() -> void:
-	#var points = ShapeUtils.arc(radius, thickness, angle, 12)
-	# collision.polygon = data.shape.generate()
-	# _start_rotation = -deg_to_rad(swing_angle / 2)
-
 	_set_hit_active(false)
 	
 	_time = 0.0
@@ -76,8 +71,8 @@ func _process(delta: float) -> void:
 		queue_free()
 
 
-func setup(direction: Vector2, weapon_data: WeaponData) -> void:
-	data = weapon_data
+func setup(direction: Vector2, attack_data: AttackData) -> void:
+	data = attack_data
 	base_rotation = direction.angle() + PI
 
 	radius = data.shape.radius
@@ -107,14 +102,6 @@ func _set_hit_active(active: bool) -> void:
 		hit_area.monitoring = active
 	if inner_area:
 		inner_area.monitoring = active
-
-
-# func _try_hit(target) -> void:
-# 	if _already_hit.has(target):
-# 		return
-
-# 	_already_hit[target] = true
-# 	hit_detected.emit([target])
 
 
 func _generate_arc_points() -> PackedVector2Array:

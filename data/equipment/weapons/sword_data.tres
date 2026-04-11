@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="WeaponData" load_steps=9 format=3 uid="uid://sa73tsldjckv"]
+[gd_resource type="Resource" script_class="WeaponData" load_steps=11 format=3 uid="uid://sa73tsldjckv"]
 
 [ext_resource type="Script" uid="uid://crjms84mooixl" path="res://scripts/systems/combat/attacks/attack_pattern_melee.gd" id="1_my68t"]
 [ext_resource type="PackedScene" uid="uid://c6m2m5mov0tcc" path="res://effects/slash/arc_slash.tscn" id="2_pc32y"]
 [ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_rgl6o"]
 [ext_resource type="Script" uid="uid://bislmwbuulstf" path="res://scripts/resources/equipment/weapon_data.gd" id="3_pc32y"]
+[ext_resource type="Script" uid="uid://6p1kdo02pawy" path="res://scripts/resources/attacks/attack_data.gd" id="3_sy21l"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="4_rgl6o"]
 [ext_resource type="Script" uid="uid://bmejlq1oy7ska" path="res://scripts/resources/shapes/arc_shape.gd" id="5_sy21l"]
 
@@ -11,17 +12,22 @@
 script = ExtResource("1_my68t")
 metadata/_custom_type_script = "uid://crjms84mooixl"
 
-[sub_resource type="Resource" id="Resource_sy21l"]
+[sub_resource type="Resource" id="Resource_okgb1"]
 script = ExtResource("5_sy21l")
 metadata/_custom_type_script = "uid://bmejlq1oy7ska"
+
+[sub_resource type="Resource" id="Resource_cjmyt"]
+script = ExtResource("3_sy21l")
+attack_scene = ExtResource("2_pc32y")
+shape = SubResource("Resource_okgb1")
+metadata/_custom_type_script = "uid://6p1kdo02pawy"
 
 [resource]
 script = ExtResource("3_pc32y")
 weapon_scene = ExtResource("4_rgl6o")
 attack_pattern = SubResource("Resource_lexvb")
-attack_scene = ExtResource("2_pc32y")
+attacks = Array[ExtResource("3_sy21l")]([SubResource("Resource_cjmyt")])
 cooldown = 2.0
-shape = SubResource("Resource_sy21l")
 id = "weapon_sword_basic"
 name = "Basic Sword"
 metadata/_custom_type_script = "uid://bislmwbuulstf"
