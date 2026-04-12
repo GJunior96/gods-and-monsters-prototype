@@ -5,6 +5,7 @@ extends Resource
 @export var damage: float = 10.0
 
 @export var shape: ShapeData
+@export var hit_shape: ShapeData
 
 @export var attack_duration: float = 0.12
 @export var hit_start: float = 0.2

@@ -4,9 +4,8 @@ extends ShapeData
 @export var radius: float = 50
 @export var thickness: float = 12
 @export var angle: float = 90
+@export var filled := false
 
 func generate() -> PackedVector2Array:
 	return ShapeUtils.arc(radius, thickness, angle)
 
-func get_inner_radius() -> float:
-	return radius - thickness

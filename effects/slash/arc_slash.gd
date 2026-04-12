@@ -6,14 +6,6 @@ extends Node2D
 
 @export var is_debug := false
 
-var duration
-var hit_start
-var hit_end
-var radius
-var thickness
-var angle
-var swing_angle
-
 var data: AttackData
 
 var _time := 0.0
@@ -33,9 +25,6 @@ func _ready() -> void:
 	if not hit_area.area_entered.is_connected(_on_area_2d_area_entered):
 		hit_area.area_entered.connect(_on_area_2d_area_entered)
 
-	if not inner_area.area_entered.is_connected(_on_inner_area_2d_area_entered):
-		inner_area.area_entered.connect(_on_inner_area_2d_area_entered)
-
 
 func _draw() -> void:
 	var points = data.shape.generate()
@@ -43,27 +32,26 @@ func _draw() -> void:
 
 	# DEBUG
 	if is_debug:
-		draw_line(Vector2.ZERO, Vector2.RIGHT * radius, Color.RED, 3) # frente
-		draw_line(Vector2.ZERO, Vector2.UP * radius, Color.BLUE, 2) # cima
+		draw_line(Vector2.ZERO, Vector2.RIGHT * data.shape.radius, Color.RED, 3) # frente
+		draw_line(Vector2.ZERO, Vector2.UP * data.shape.radius, Color.BLUE, 2) # cima
 		draw_line(Vector2.ZERO, Vector2.RIGHT * 50, Color.GREEN, 3) # direcao do ataque
 		draw_circle(Vector2.ZERO, 5, Color.GREEN) # centro do slash
-		draw_circle(Vector2.ZERO, radius - thickness, Color.RED) # inner radius
 
 
 func _process(delta: float) -> void:
 	_time += delta
-	var t = _time / duration
+	var t = _time / data.attack_duration
 
 	# animacao rotacao
-	var swing = lerp_angle(_start_rotation, _start_rotation + deg_to_rad(swing_angle), t)
+	var swing = lerp_angle(_start_rotation, _start_rotation + deg_to_rad(data.swing_angle), t)
 
 	rotation = base_rotation + swing
 
 	# hit frame
-	if not _hit_active and t >= hit_start:
+	if not _hit_active and t >= data.hit_start:
 		_set_hit_active(true)
 
-	if _hit_active and t >= hit_end:
+	if _hit_active and t >= data.hit_end:
 		_set_hit_active(false)
 
 	modulate.a = 1.0 - t
@@ -75,25 +63,9 @@ func setup(direction: Vector2, attack_data: AttackData) -> void:
 	data = attack_data
 	base_rotation = direction.angle() + PI
 
-	radius = data.shape.radius
-	thickness = data.shape.thickness
-	angle = data.shape.angle
-
-	swing_angle = data.swing_angle
-	duration = data.attack_duration
-	hit_start = data.hit_start
-	hit_end = data.hit_end
-
-	collision.polygon = data.shape.generate()
-	_start_rotation = -deg_to_rad(swing_angle / 2)
-
-	var inner_radius = data.shape.get_inner_radius()
-	var col = inner_area.get_node("CollisionShape2D")
-
-	if col.shape:
-		col.shape.radius = inner_radius
-	else:
-		push_error("InnerArea has no shape assigned")
+	if data and data.hit_shape:
+		collision.polygon = data.hit_shape.generate()
+	_start_rotation = -deg_to_rad(data.swing_angle / 2)
 
 
 func _set_hit_active(active: bool) -> void:
@@ -104,32 +76,6 @@ func _set_hit_active(active: bool) -> void:
 		inner_area.monitoring = active
 
 
-func _generate_arc_points() -> PackedVector2Array:
-	var points := []
-
-	var  start_angle = deg_to_rad(-angle / 2)
-	var end_angle = deg_to_rad(angle / 2)
-	var steps = 12
-
-	for i in range(steps + 1):
-		var t = i / float(steps)
-		var a = lerp(start_angle, end_angle, t)
-
-		var outer = Vector2(cos(a), -sin(a)) * radius
-
-		points.append(outer)
-
-	for i in range(steps, -1, -1):
-		var t = i/ float(steps)
-		var a = lerp(start_angle, end_angle, t)
-
-		var inner = Vector2(cos(a), sin(a)) * (radius - thickness)
-
-		points.append(inner)
-
-	return points
-
-
 func _on_area_2d_area_entered(area: Area2D) -> void:
 	if not _hit_active:
 		return
@@ -137,16 +83,4 @@ func _on_area_2d_area_entered(area: Area2D) -> void:
 	var enemy = area.get_parent()
 
 	if enemy is Enemy:
-		#_try_hit(enemy)
-		hit_detected.emit([enemy])
-
-
-func _on_inner_area_2d_area_entered(area: Area2D) -> void:
-	if not _hit_active:
-		return
-
-	var enemy = area.get_parent()
-
-	if enemy is Enemy: # and not _already_hit.has(enemy):
-		#_try_hit(enemy)
 		hit_detected.emit([enemy])

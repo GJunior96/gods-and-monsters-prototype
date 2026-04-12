@@ -32,4 +32,3 @@ func _on_hit_detected(targets: Array, attack: AttackData) -> void:
 
 	if valid_targets.size() > 0:
 		_apply_damage(valid_targets, attack)
-

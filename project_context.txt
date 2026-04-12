@@ -49,6 +49,9 @@
 │   │   ├── player.gd
 │   │   └── player.gd.uid
 │   ├── resources
+│   │   ├── attacks
+│   │   │   ├── attack_data.gd
+│   │   │   └── attack_data.gd.uid
 │   │   ├── equipment
 │   │   │   ├── equipment_data.gd
 │   │   │   ├── equipment_data.gd.uid
@@ -131,7 +134,7 @@
     ├── square 64.png.import
     └── —Pngtree—circle clipart purple circle_5553138.png:Zone.Identifier
 
-29 directories, 102 files
+30 directories, 104 files
 
 
 
@@ -221,7 +224,9 @@ func try_attack() -> void:
 	for modifier in data.modifiers:
 		modifier.apply(final_data)
 
-	final_data.attack_pattern.execute(self, player, final_data)
+	var attack = final_data.attacks[0] # TODO: select attack based on pattern
+
+	final_data.attack_pattern.execute(self, player, attack)
 
 
 	player.update_target()
@@ -276,25 +281,25 @@ extends AttackPattern
 
 var _already_hit = {}
 
-func execute(_equipment, player, data):
+func execute(_equipment, player, attack: AttackData):
 	_already_hit.clear()
 
-	var attack_instance = data.attack_scene.instantiate()
+	var attack_instance = attack.attack_scene.instantiate()
 	var forward = player.attack_direction.normalized()
 
 	player.get_parent().add_child(attack_instance)
 
 
 	attack_instance.global_position = player.global_position
-	attack_instance.setup(forward, data)
-	attack_instance.hit_detected.connect(_on_hit_detected.bind(data))
+	attack_instance.setup(forward, attack)
+	attack_instance.hit_detected.connect(_on_hit_detected.bind(attack))
 
-func _apply_damage(targets, data):
+func _apply_damage(targets, attack: AttackData):
 	for enemy in targets:
-		enemy.take_damage(data.damage)
+		enemy.take_damage(attack.damage)
 
 
-func _on_hit_detected(targets: Array, data: WeaponData) -> void:
+func _on_hit_detected(targets: Array, attack: AttackData) -> void:
 	var valid_targets = []
 	for target in targets:
 		if _already_hit.has(target):
@@ -304,7 +309,7 @@ func _on_hit_detected(targets: Array, data: WeaponData) -> void:
 		valid_targets.append(target)
 
 	if valid_targets.size() > 0:
-		_apply_damage(valid_targets, data)
+		_apply_damage(valid_targets, attack)
 
 
 ===== FIM DO ARQUIVO =====
@@ -336,9 +341,10 @@ extends ShapeData
 @export var radius: float = 50
 @export var thickness: float = 12
 @export var angle: float = 90
+@export var filled := false
 
 func generate() -> PackedVector2Array:
-	return ShapeUtils.arc(radius, thickness, angle)
+	return ShapeUtils.arc(radius, thickness, angle, filled)
 
 func get_inner_radius() -> float:
 	return radius - thickness
@@ -356,23 +362,11 @@ extends EquipmentData
 
 @export var weapon_scene: PackedScene
 @export var attack_pattern: AttackPattern
-@export var attack_scene: PackedScene
+@export var attacks: Array[AttackData]
 
-@export var damage: int = 10
 @export var cooldown: float = 0.5
 @export var attack_range: float = 80
-@export var attack_duration: float = 0.12
 @export var modifiers: Array[AttackModifier]
-
-# Slash
-# @export var slash_radius: float = 50.0
-# @export var slash_thickness: float = 12.0
-# @export var slash_angle: float = 90.0
-
-@export var swing_angle: float = 90.0
-@export var hit_start: float = 0.4
-@export var hit_end: float = 0.6
-@export var shape: ShapeData
 
 @export var projectile_scene: PackedScene
 
@@ -382,6 +376,27 @@ func create_instance(player) -> EquipmentBase:
 	weapon.setup(player, self)
 	return weapon
 
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/resources/attacks/attack_data.gd
+Tipo: SCRIPT
+====================================
+class_name AttackData
+extends Resource
+
+@export var attack_scene: PackedScene
+@export var damage: float = 10.0
+
+@export var shape: ShapeData
+
+@export var attack_duration: float = 0.12
+@export var hit_start: float = 0.2
+@export var hit_end: float = 0.5
+
+@export var swing_angle: float = 90.0
 
 ===== FIM DO ARQUIVO =====
 
@@ -406,18 +421,19 @@ var level: int = 1
 var xp: int = 0
 var xp_to_next_level: int = 20
 
-# targeting vars
+# targeting vars -----------------------------
 @export var target_update_interval := 0.2
 var _target_timer := 0.0
 var current_target: Node2D
 var attack_direction: Vector2 = Vector2.RIGHT
+# --------------------------------------------
 
-# weapon draw vars
+# bebug attack vars ----------
 var show_attack_debug := true
+var base_points
+var inner_radius
 var attack_range
-var attack_radius
-var attack_thickness
-var attack_angle
+# ---------------------------
 
 signal xp_changed(current, max)
 signal leveled_up(new_level)
@@ -430,14 +446,13 @@ signal on_damage_taken
 func _ready():
 	var equipment_data = ItemDatabase.get_item(starting_equipment_id)
 
-	# attack_range = equipment_data.attack_range
-	# attack_radius = equipment_data.shape.radius
-	# attack_thickness = equipment_data.shape.thickness
-	# attack_angle = equipment_data.shape.angle
-
 
 	equip(equipment_data)
 
+	if OS.is_debug_build() or show_attack_debug:
+		attack_range = equipment_data.attack_range
+		base_points = equipment_data.attacks[0].shape.generate()
+		inner_radius = equipment_data.attacks[0].shape.get_inner_radius()
 
 func _process(delta):
 	_target_timer += delta
@@ -446,8 +461,8 @@ func _process(delta):
 		update_target()
 		_target_timer = 0.0
 
-	# if show_attack_debug:
-	# 	queue_redraw()
+	if show_attack_debug:
+		queue_redraw()
 
 
 func _physics_process(_delta):
@@ -463,28 +478,23 @@ func update_target():
 		attack_direction = TargetingUtils.get_direction(current_target.global_position, global_position)
 
 
-# func _draw():
-# 	if not show_attack_debug and not attack_range and not attack_radius and not attack_direction:
-# 		return
+func _draw():
+	if not show_attack_debug or not OS.is_debug_build():
+		return
 
-# 	var base_points = ShapeUtils.arc(attack_radius, attack_thickness, attack_angle, 12)
-# 	var rotated_points := []
+	var rotated_points := []
 
-# 	var rot = attack_direction.angle()
+	var rot = attack_direction.angle()
 
-# 	for point in base_points:
-# 		rotated_points.append(point.rotated(rot))
+	for point in base_points:
+		rotated_points.append(point.rotated(rot))
 
-# 	draw_polygon(rotated_points, [Color("#ffd90080")])
+	draw_polygon(rotated_points, [Color("#ffd90080")])
 
-# 	draw_line(Vector2.ZERO, attack_direction * attack_range, Color.GREEN, 3) # direcao do ataque
-# 	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.2)) # range do ataque
+	draw_line(Vector2.ZERO, attack_direction * attack_range, Color.GREEN, 3) # direcao do ataque
+	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.2)) # range do ataque
+	draw_circle(Vector2.ZERO, inner_radius, Color(0, 0, 1, 0.2)) # inner radius
 
-
-
-# func _draw_attack_cone():
-# 	var points = ShapeUtils.arc(attack_radius, attack_thickness, attack_angle, 12)
-# 	#draw_colored_polygon(points, attack_direction, Color(1, 1, 0, 0.3))
 
 
 func handle_movement() -> void:
@@ -615,22 +625,17 @@ var thickness
 var angle
 var swing_angle
 
-var data: WeaponData
+var data: AttackData
 
 var _time := 0.0
 var _start_rotation := 0.0
 var base_rotation := 0.0
 var _hit_active := false
-#var _already_hit := {}
 
 signal hit_detected(targets: Array)
 
 
 func _ready() -> void:
-	#var points = ShapeUtils.arc(radius, thickness, angle, 12)
-	# collision.polygon = data.shape.generate()
-	# _start_rotation = -deg_to_rad(swing_angle / 2)
-
 	_set_hit_active(false)
 	
 	_time = 0.0
@@ -677,8 +682,8 @@ func _process(delta: float) -> void:
 		queue_free()
 
 
-func setup(direction: Vector2, weapon_data: WeaponData) -> void:
-	data = weapon_data
+func setup(direction: Vector2, attack_data: AttackData) -> void:
+	data = attack_data
 	base_rotation = direction.angle() + PI
 
 	radius = data.shape.radius
@@ -710,40 +715,6 @@ func _set_hit_active(active: bool) -> void:
 		inner_area.monitoring = active
 
 
-# func _try_hit(target) -> void:
-# 	if _already_hit.has(target):
-# 		return
-
-# 	_already_hit[target] = true
-# 	hit_detected.emit([target])
-
-
-func _generate_arc_points() -> PackedVector2Array:
-	var points := []
-
-	var  start_angle = deg_to_rad(-angle / 2)
-	var end_angle = deg_to_rad(angle / 2)
-	var steps = 12
-
-	for i in range(steps + 1):
-		var t = i / float(steps)
-		var a = lerp(start_angle, end_angle, t)
-
-		var outer = Vector2(cos(a), -sin(a)) * radius
-
-		points.append(outer)
-
-	for i in range(steps, -1, -1):
-		var t = i/ float(steps)
-		var a = lerp(start_angle, end_angle, t)
-
-		var inner = Vector2(cos(a), sin(a)) * (radius - thickness)
-
-		points.append(inner)
-
-	return points
-
-
 func _on_area_2d_area_entered(area: Area2D) -> void:
 	if not _hit_active:
 		return
@@ -773,12 +744,13 @@ func _on_inner_area_2d_area_entered(area: Area2D) -> void:
 Arquivo: ./data/equipment/weapons/sword_data.tres
 Tipo: TRES
 ====================================
-[gd_resource type="Resource" script_class="WeaponData" load_steps=9 format=3 uid="uid://sa73tsldjckv"]
+[gd_resource type="Resource" script_class="WeaponData" load_steps=11 format=3 uid="uid://sa73tsldjckv"]
 
 [ext_resource type="Script" uid="uid://crjms84mooixl" path="res://scripts/systems/combat/attacks/attack_pattern_melee.gd" id="1_my68t"]
 [ext_resource type="PackedScene" uid="uid://c6m2m5mov0tcc" path="res://effects/slash/arc_slash.tscn" id="2_pc32y"]
 [ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_rgl6o"]
 [ext_resource type="Script" uid="uid://bislmwbuulstf" path="res://scripts/resources/equipment/weapon_data.gd" id="3_pc32y"]
+[ext_resource type="Script" uid="uid://6p1kdo02pawy" path="res://scripts/resources/attacks/attack_data.gd" id="3_sy21l"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="4_rgl6o"]
 [ext_resource type="Script" uid="uid://bmejlq1oy7ska" path="res://scripts/resources/shapes/arc_shape.gd" id="5_sy21l"]
 
@@ -786,17 +758,22 @@ Tipo: TRES
 script = ExtResource("1_my68t")
 metadata/_custom_type_script = "uid://crjms84mooixl"
 
-[sub_resource type="Resource" id="Resource_sy21l"]
+[sub_resource type="Resource" id="Resource_okgb1"]
 script = ExtResource("5_sy21l")
 metadata/_custom_type_script = "uid://bmejlq1oy7ska"
+
+[sub_resource type="Resource" id="Resource_cjmyt"]
+script = ExtResource("3_sy21l")
+attack_scene = ExtResource("2_pc32y")
+shape = SubResource("Resource_okgb1")
+metadata/_custom_type_script = "uid://6p1kdo02pawy"
 
 [resource]
 script = ExtResource("3_pc32y")
 weapon_scene = ExtResource("4_rgl6o")
 attack_pattern = SubResource("Resource_lexvb")
-attack_scene = ExtResource("2_pc32y")
+attacks = Array[ExtResource("3_sy21l")]([SubResource("Resource_cjmyt")])
 cooldown = 2.0
-shape = SubResource("Resource_sy21l")
 id = "weapon_sword_basic"
 name = "Basic Sword"
 metadata/_custom_type_script = "uid://bislmwbuulstf"
