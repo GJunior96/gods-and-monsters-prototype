@@ -14,14 +14,17 @@ func execute(_equipment, player, attack: AttackData):
 
 	attack_instance.global_position = player.global_position
 	attack_instance.setup(forward, attack)
-	attack_instance.hit_detected.connect(_on_hit_detected.bind(attack))
+	attack_instance.hit_detected.connect(_on_hit_detected.bind(attack, player))
 
-func _apply_damage(targets, attack: AttackData):
+func _apply_damage(targets, attack: AttackData, player):
 	for enemy in targets:
 		enemy.take_damage(attack.damage)
 
+		var dir = (enemy.global_position - player.global_position).normalized()
+		enemy.apply_knockback(dir, attack.knockback_force)
 
-func _on_hit_detected(targets: Array, attack: AttackData) -> void:
+
+func _on_hit_detected(targets: Array, attack: AttackData, player) -> void:
 	var valid_targets = []
 	for target in targets:
 		if _already_hit.has(target):
@@ -31,4 +34,4 @@ func _on_hit_detected(targets: Array, attack: AttackData) -> void:
 		valid_targets.append(target)
 
 	if valid_targets.size() > 0:
-		_apply_damage(valid_targets, attack)
+		_apply_damage(valid_targets, attack, player)

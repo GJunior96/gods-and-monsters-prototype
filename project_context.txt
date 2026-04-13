@@ -62,6 +62,8 @@
 │   │   └── shapes
 │   │       ├── arc_shape.gd
 │   │       ├── arc_shape.gd.uid
+│   │       ├── cone_shape.gd
+│   │       ├── cone_shape.gd.uid
 │   │       ├── shape_data.gd
 │   │       └── shape_data.gd.uid
 │   ├── systems
@@ -134,7 +136,7 @@
     ├── square 64.png.import
     └── —Pngtree—circle clipart purple circle_5553138.png:Zone.Identifier
 
-30 directories, 104 files
+30 directories, 106 files
 
 
 
@@ -156,9 +158,6 @@ static func arc(radius: float, thickness: float, angle: float, steps := 12) -> P
 		var t = i / float(steps)
 		var a = lerp(start_angle, end_angle, t)
 
-		#var outer = Vector2(cos(a), -sin(a)) * radius
-		#points.append(outer)
-
 		var dir = Vector2(cos(a), sin(a))
 
 		var taper = sin(t * PI) # taper de 0 a 1 a 0 para criar um efeito de "afunilamento" no início e fim do arco
@@ -166,23 +165,66 @@ static func arc(radius: float, thickness: float, angle: float, steps := 12) -> P
 
 		points.append(dir * (radius - offset))
 
+	# inner
 	for i in range(steps, -1, -1):
 		var t = i / float(steps)
 		var a = lerp(start_angle, end_angle, t)
-
-		#var inner = Vector2(cos(a), sin(a)) * (radius - thickness)
-		#points.append(inner)
 		
 		var dir = Vector2(cos(a), sin(a))
 
 		var taper = sin(t * PI) # mesmo taper para a parte interna
-		#var current_thickness = thickness * taper
 		var offset = thickness * (1.0 - taper) * 0.5 # mesmo offset para manter o centro consistente
 
 		points.append(dir * (radius - thickness + offset))
 
 
 	return points
+
+static func cone(radius: float, angle: float, steps := 12) -> PackedVector2Array:
+	var points := []
+
+	var start_angle = deg_to_rad(-angle / 2)
+	var end_angle = deg_to_rad(angle / 2)
+
+	for i in range(steps + 1):
+		var t = i / float(steps)
+		var a = lerp(start_angle, end_angle, t)
+
+		var dir = Vector2(cos(a), sin(a))
+		points.append(dir * radius)
+		
+	points.append(Vector2.ZERO) # centro do cone
+
+	return points
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/systems/targeting/targeting_utils.gd
+Tipo: SCRIPT
+====================================
+class_name TargetingUtils
+
+static func _get_nearest_enemy(from: Vector2) -> Node2D:
+	var enemies = EnemyManager.enemies
+
+	var nearest = null
+	var min_dist = INF
+
+	for enemmy in enemies:
+		var dist = from.distance_to(enemmy.global_position)
+
+		if dist < min_dist:
+			min_dist = dist
+			nearest = enemmy
+	
+	return nearest
+
+
+static func get_direction(from: Vector2, to: Vector2) -> Vector2:
+	return (to - from).normalized()
+
 
 ===== FIM DO ARQUIVO =====
 
@@ -259,6 +301,21 @@ func try_attack() -> void:
 
 
 ====================================
+Arquivo: ./scripts/systems/combat/modifiers/damage_modifier.gd
+Tipo: SCRIPT
+====================================
+class_name DamageModifier
+extends AttackModifier
+
+@export var bonus_damage: int
+
+func apply(data: WeaponData):
+	data.damage += bonus_damage
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
 Arquivo: ./scripts/systems/combat/modifiers/attack_modifier.gd
 Tipo: SCRIPT
 ====================================
@@ -316,6 +373,19 @@ func _on_hit_detected(targets: Array, attack: AttackData) -> void:
 
 
 ====================================
+Arquivo: ./scripts/systems/combat/attacks/attack_pattern.gd
+Tipo: SCRIPT
+====================================
+class_name AttackPattern
+extends Resource
+
+func execute(equipment, player, attack: AttackData):
+	pass
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
 Arquivo: ./scripts/resources/shapes/shape_data.gd
 Tipo: SCRIPT
 ====================================
@@ -327,6 +397,24 @@ func generate() -> PackedVector2Array:
 
 func get_inner_radius() -> float:
 	return 0.0
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/resources/shapes/cone_shape.gd
+Tipo: SCRIPT
+====================================
+class_name ConeShapeData
+extends ShapeData
+
+@export var radius: float = 50.0
+@export var angle: float = 90.0
+@export var steps: int = 12
+
+func generate() -> PackedVector2Array:
+	return ShapeUtils.cone(radius,angle, steps)
+
 
 ===== FIM DO ARQUIVO =====
 
@@ -344,10 +432,8 @@ extends ShapeData
 @export var filled := false
 
 func generate() -> PackedVector2Array:
-	return ShapeUtils.arc(radius, thickness, angle, filled)
+	return ShapeUtils.arc(radius, thickness, angle)
 
-func get_inner_radius() -> float:
-	return radius - thickness
 
 
 ===== FIM DO ARQUIVO =====
@@ -391,6 +477,7 @@ extends Resource
 @export var damage: float = 10.0
 
 @export var shape: ShapeData
+@export var hit_shape: ShapeData
 
 @export var attack_duration: float = 0.12
 @export var hit_start: float = 0.2
@@ -451,8 +538,8 @@ func _ready():
 
 	if OS.is_debug_build() or show_attack_debug:
 		attack_range = equipment_data.attack_range
-		base_points = equipment_data.attacks[0].shape.generate()
-		inner_radius = equipment_data.attacks[0].shape.get_inner_radius()
+		base_points = equipment_data.attacks[0].hit_shape.generate()
+
 
 func _process(delta):
 	_target_timer += delta
@@ -493,8 +580,6 @@ func _draw():
 
 	draw_line(Vector2.ZERO, attack_direction * attack_range, Color.GREEN, 3) # direcao do ataque
 	draw_circle(Vector2.ZERO, attack_range, Color(1, 0, 0, 0.2)) # range do ataque
-	draw_circle(Vector2.ZERO, inner_radius, Color(0, 0, 1, 0.2)) # inner radius
-
 
 
 func handle_movement() -> void:
@@ -558,6 +643,22 @@ func equip(data: EquipmentData) -> void:
 
 
 ====================================
+Arquivo: ./scripts/global/events/event_bus.gd
+Tipo: SCRIPT
+====================================
+extends Node
+
+
+signal attack_requested
+signal damage_taken(target, amount)
+signal enemy_killed(enemy)
+signal equipment_quipped(equipment)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
 Arquivo: ./scenes/equipment/Weapon.tscn
 Tipo: SCENE
 ====================================
@@ -576,11 +677,9 @@ script = ExtResource("1_2o6pn")
 Arquivo: ./effects/slash/arc_slash.tscn
 Tipo: SCENE
 ====================================
-[gd_scene load_steps=3 format=3 uid="uid://c6m2m5mov0tcc"]
+[gd_scene load_steps=2 format=3 uid="uid://c6m2m5mov0tcc"]
 
 [ext_resource type="Script" uid="uid://do4cd8rowawb8" path="res://effects/slash/arc_slash.gd" id="1_urlpw"]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_urlpw"]
 
 [node name="ArcSlash" type="Node2D"]
 script = ExtResource("1_urlpw")
@@ -591,15 +690,7 @@ collision_mask = 16
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Area2D"]
 
-[node name="InnerArea2D" type="Area2D" parent="."]
-collision_layer = 8
-collision_mask = 16
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InnerArea2D"]
-shape = SubResource("CircleShape2D_urlpw")
-
 [connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]
-[connection signal="area_entered" from="InnerArea2D" to="." method="_on_inner_area_2d_area_entered"]
 
 
 ===== FIM DO ARQUIVO =====
@@ -616,14 +707,6 @@ extends Node2D
 @onready var inner_area: Area2D = $InnerArea2D
 
 @export var is_debug := false
-
-var duration
-var hit_start
-var hit_end
-var radius
-var thickness
-var angle
-var swing_angle
 
 var data: AttackData
 
@@ -644,9 +727,6 @@ func _ready() -> void:
 	if not hit_area.area_entered.is_connected(_on_area_2d_area_entered):
 		hit_area.area_entered.connect(_on_area_2d_area_entered)
 
-	if not inner_area.area_entered.is_connected(_on_inner_area_2d_area_entered):
-		inner_area.area_entered.connect(_on_inner_area_2d_area_entered)
-
 
 func _draw() -> void:
 	var points = data.shape.generate()
@@ -654,27 +734,26 @@ func _draw() -> void:
 
 	# DEBUG
 	if is_debug:
-		draw_line(Vector2.ZERO, Vector2.RIGHT * radius, Color.RED, 3) # frente
-		draw_line(Vector2.ZERO, Vector2.UP * radius, Color.BLUE, 2) # cima
+		draw_line(Vector2.ZERO, Vector2.RIGHT * data.shape.radius, Color.RED, 3) # frente
+		draw_line(Vector2.ZERO, Vector2.UP * data.shape.radius, Color.BLUE, 2) # cima
 		draw_line(Vector2.ZERO, Vector2.RIGHT * 50, Color.GREEN, 3) # direcao do ataque
 		draw_circle(Vector2.ZERO, 5, Color.GREEN) # centro do slash
-		draw_circle(Vector2.ZERO, radius - thickness, Color.RED) # inner radius
 
 
 func _process(delta: float) -> void:
 	_time += delta
-	var t = _time / duration
+	var t = _time / data.attack_duration
 
 	# animacao rotacao
-	var swing = lerp_angle(_start_rotation, _start_rotation + deg_to_rad(swing_angle), t)
+	var swing = lerp_angle(_start_rotation, _start_rotation + deg_to_rad(data.swing_angle), t)
 
 	rotation = base_rotation + swing
 
 	# hit frame
-	if not _hit_active and t >= hit_start:
+	if not _hit_active and t >= data.hit_start:
 		_set_hit_active(true)
 
-	if _hit_active and t >= hit_end:
+	if _hit_active and t >= data.hit_end:
 		_set_hit_active(false)
 
 	modulate.a = 1.0 - t
@@ -686,25 +765,9 @@ func setup(direction: Vector2, attack_data: AttackData) -> void:
 	data = attack_data
 	base_rotation = direction.angle() + PI
 
-	radius = data.shape.radius
-	thickness = data.shape.thickness
-	angle = data.shape.angle
-
-	swing_angle = data.swing_angle
-	duration = data.attack_duration
-	hit_start = data.hit_start
-	hit_end = data.hit_end
-
-	collision.polygon = data.shape.generate()
-	_start_rotation = -deg_to_rad(swing_angle / 2)
-
-	var inner_radius = data.shape.get_inner_radius()
-	var col = inner_area.get_node("CollisionShape2D")
-
-	if col.shape:
-		col.shape.radius = inner_radius
-	else:
-		push_error("InnerArea has no shape assigned")
+	if data and data.hit_shape:
+		collision.polygon = data.hit_shape.generate()
+	_start_rotation = -deg_to_rad(data.swing_angle / 2)
 
 
 func _set_hit_active(active: bool) -> void:
@@ -722,20 +785,7 @@ func _on_area_2d_area_entered(area: Area2D) -> void:
 	var enemy = area.get_parent()
 
 	if enemy is Enemy:
-		#_try_hit(enemy)
 		hit_detected.emit([enemy])
-
-
-func _on_inner_area_2d_area_entered(area: Area2D) -> void:
-	if not _hit_active:
-		return
-
-	var enemy = area.get_parent()
-
-	if enemy is Enemy: # and not _already_hit.has(enemy):
-		#_try_hit(enemy)
-		hit_detected.emit([enemy])
-
 
 ===== FIM DO ARQUIVO =====
 
@@ -744,19 +794,24 @@ func _on_inner_area_2d_area_entered(area: Area2D) -> void:
 Arquivo: ./data/equipment/weapons/sword_data.tres
 Tipo: TRES
 ====================================
-[gd_resource type="Resource" script_class="WeaponData" load_steps=11 format=3 uid="uid://sa73tsldjckv"]
+[gd_resource type="Resource" script_class="WeaponData" load_steps=13 format=3 uid="uid://sa73tsldjckv"]
 
 [ext_resource type="Script" uid="uid://crjms84mooixl" path="res://scripts/systems/combat/attacks/attack_pattern_melee.gd" id="1_my68t"]
 [ext_resource type="PackedScene" uid="uid://c6m2m5mov0tcc" path="res://effects/slash/arc_slash.tscn" id="2_pc32y"]
 [ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_rgl6o"]
 [ext_resource type="Script" uid="uid://bislmwbuulstf" path="res://scripts/resources/equipment/weapon_data.gd" id="3_pc32y"]
 [ext_resource type="Script" uid="uid://6p1kdo02pawy" path="res://scripts/resources/attacks/attack_data.gd" id="3_sy21l"]
+[ext_resource type="Script" uid="uid://bsknupp63dlxw" path="res://scripts/resources/shapes/cone_shape.gd" id="4_okgb1"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="4_rgl6o"]
 [ext_resource type="Script" uid="uid://bmejlq1oy7ska" path="res://scripts/resources/shapes/arc_shape.gd" id="5_sy21l"]
 
 [sub_resource type="Resource" id="Resource_lexvb"]
 script = ExtResource("1_my68t")
 metadata/_custom_type_script = "uid://crjms84mooixl"
+
+[sub_resource type="Resource" id="Resource_jyf0i"]
+script = ExtResource("4_okgb1")
+metadata/_custom_type_script = "uid://bsknupp63dlxw"
 
 [sub_resource type="Resource" id="Resource_okgb1"]
 script = ExtResource("5_sy21l")
@@ -766,6 +821,7 @@ metadata/_custom_type_script = "uid://bmejlq1oy7ska"
 script = ExtResource("3_sy21l")
 attack_scene = ExtResource("2_pc32y")
 shape = SubResource("Resource_okgb1")
+hit_shape = SubResource("Resource_jyf0i")
 metadata/_custom_type_script = "uid://6p1kdo02pawy"
 
 [resource]

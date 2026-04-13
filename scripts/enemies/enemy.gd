@@ -15,6 +15,11 @@ var life: int
 var speed: float
 var damage: int
 
+# knockback vars ------------------------
+@export var knockback_resistance := 1.0
+@export var friction := 200.0
+# ---------------------------------------
+
 
 func _ready():
 	EnemyManager.register_enemy(self)
@@ -28,7 +33,11 @@ func _physics_process(delta):
 		return
 
 	var direction = (target.global_position - global_position). normalized()
-	velocity = direction * speed
+	var desired_velocity = direction * speed
+
+	# Aplica fricção
+	velocity = velocity.move_toward(desired_velocity, friction * delta)
+	#velocity = direction * speed
 	move_and_slide()
 
 
@@ -36,6 +45,14 @@ func setup(difficulty_multiplier: float):
 	life = roundi(base_life * difficulty_multiplier)
 	damage = roundi(base_damage * difficulty_multiplier)
 	speed = base_speed * (1 + (difficulty_multiplier - 1) * 0.3)
+
+
+func apply_knockback(direction: Vector2, force: float):
+	if dead:
+		return
+
+	var knockback = direction.normalized() * (force / knockback_resistance)
+	velocity += knockback
 
 
 func take_damage(amount: int):

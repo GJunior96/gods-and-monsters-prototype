@@ -3,6 +3,7 @@ extends Resource
 
 @export var attack_scene: PackedScene
 @export var damage: float = 10.0
+@export var knockback_force: float = 150.0
 
 @export var shape: ShapeData
 @export var hit_shape: ShapeData

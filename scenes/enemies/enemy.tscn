@@ -15,6 +15,7 @@ script = ExtResource("2_8e3ao")
 xp_drop_scene = ExtResource("2_fcftc")
 base_speed = 100.0
 base_damage = 20
+friction = 200.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_38ino")
