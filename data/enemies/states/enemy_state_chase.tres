@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="EnemyStateData" load_steps=2 format=3 uid="uid://ddrj2c7s2csy1"]
+
+[ext_resource type="Script" uid="uid://cp51ftfkb2qp3" path="res://scripts/resources/enemies/states/enemy_state_data.gd" id="1_86ce7"]
+
+[resource]
+script = ExtResource("1_86ce7")
+metadata/_custom_type_script = "uid://cp51ftfkb2qp3"

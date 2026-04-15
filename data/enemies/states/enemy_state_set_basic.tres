@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnemyStateSet" load_steps=5 format=3 uid="uid://bgalslmqb62rj"]
+
+[ext_resource type="Resource" uid="uid://ddrj2c7s2csy1" path="res://data/enemies/states/enemy_state_chase.tres" id="1_itavt"]
+[ext_resource type="Script" uid="uid://bsy1yegx5m4eh" path="res://scripts/enemies/states/enemy_state_set.gd" id="1_u2scf"]
+[ext_resource type="Resource" uid="uid://vg0xqp47a27" path="res://data/enemies/states/enemy_state_dead.tres" id="2_r5ieq"]
+[ext_resource type="Resource" uid="uid://cyrpatva654av" path="res://data/enemies/states/enemy_state_stunned.tres" id="4_ksm5e"]
+
+[resource]
+script = ExtResource("1_u2scf")
+chase = ExtResource("1_itavt")
+stunned = ExtResource("4_ksm5e")
+dead = ExtResource("2_r5ieq")
+metadata/_custom_type_script = "uid://bsy1yegx5m4eh"

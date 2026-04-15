@@ -9,15 +9,24 @@ extends CharacterBody2D
 @export var xp_value := 10
 @export var min_spawn_time := 0.0
 
-
 var dead := false
 var life: int
 var speed: float
 var damage: int
 
 # knockback vars ------------------------
-@export var knockback_resistance := 1.0
-@export var friction := 200.0
+@export var mass := 1.0
+@export var friction := 500.0
+# ---------------------------------------
+
+# state vars -----------------------------
+#@export var stun_duration := 0.15
+var current_state: EnemyState
+var chase_state: EnemyState
+var stunned_state: EnemyState
+var dead_state: EnemyState
+var stun_timer := 0.15
+@export var state_set: EnemyStateSet
 # ---------------------------------------
 
 
@@ -26,19 +35,20 @@ func _ready():
 
 	if life == 0:
 		setup(1.0)
+	
+	chase_state = EnemyChaseState.new().setup(state_set.chase)
+	stunned_state = EnemyStunnedState.new().setup(state_set.stunned)
+	dead_state = EnemyDeadState.new().setup(state_set.dead)
+	
+	change_state(chase_state)
 
 
 func _physics_process(delta):
 	if dead or target == null:
 		return
 
-	var direction = (target.global_position - global_position). normalized()
-	var desired_velocity = direction * speed
-
-	# Aplica fricção
-	velocity = velocity.move_toward(desired_velocity, friction * delta)
-	#velocity = direction * speed
-	move_and_slide()
+	if current_state:
+		current_state.physics_update(self, delta)
 
 
 func setup(difficulty_multiplier: float):
@@ -51,8 +61,10 @@ func apply_knockback(direction: Vector2, force: float):
 	if dead:
 		return
 
-	var knockback = direction.normalized() * (force / knockback_resistance)
-	velocity += knockback
+	var knockback = direction.normalized() * (force / mass)
+	velocity = knockback
+
+	change_state(stunned_state)
 
 
 func take_damage(amount: int):
@@ -68,10 +80,7 @@ func take_damage(amount: int):
 func die():
 	dead = true
 
-	# Para o movimento
-	velocity = Vector2.ZERO
-	set_physics_process(false)
-
+	change_state(dead_state)
 	# Desliga colisao imediatamente
 	$CollisionShape2D.disabled = true
 
@@ -84,6 +93,16 @@ func die():
 	GlobalLogger.log("Freeing: " + name)
 	EnemyManager.unregister_enemy(self)
 	queue_free()
+
+
+func change_state(new_state: EnemyState):
+	if current_state:
+		current_state.exit(self)
+	
+	current_state = new_state
+
+	if current_state:
+		current_state.enter(self)
 
 
 func _exit_tree():
