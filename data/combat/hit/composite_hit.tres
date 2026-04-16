@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CompositeHitPolicy" load_steps=5 format=3 uid="uid://bjvuiada4qxhv"]
+
+[ext_resource type="Script" uid="uid://bn40ld13rhgxn" path="res://scripts/systems/combat/hit/hit_policy.gd" id="1_kjdl7"]
+[ext_resource type="Script" uid="uid://dy4fgv2rbd0th" path="res://scripts/systems/combat/hit/composite_hit_policy.gd" id="2_21w3t"]
+[ext_resource type="Resource" uid="uid://bcsrm47hkycls" path="res://data/combat/hit/damage.tres" id="2_xg4uy"]
+[ext_resource type="Resource" uid="uid://sp2pitrs0bgl" path="res://data/combat/hit/knockback.tres" id="3_igqfh"]
+
+[resource]
+script = ExtResource("2_21w3t")
+policies = Array[ExtResource("1_kjdl7")]([ExtResource("2_xg4uy"), ExtResource("3_igqfh")])
+metadata/_custom_type_script = "uid://dy4fgv2rbd0th"

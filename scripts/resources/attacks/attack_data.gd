@@ -2,6 +2,7 @@ class_name AttackData
 extends Resource
 
 @export var attack_scene: PackedScene
+@export var hit_policy: HitPolicy
 @export var damage: float = 10.0
 @export var knockback_force: float = 150.0
 

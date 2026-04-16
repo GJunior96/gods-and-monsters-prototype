@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="KnockbackPolicy" load_steps=2 format=3 uid="uid://sp2pitrs0bgl"]
+
+[ext_resource type="Script" uid="uid://d0mgk7lia85k1" path="res://scripts/systems/combat/hit/knockback_policy.gd" id="1_482mt"]
+
+[resource]
+script = ExtResource("1_482mt")
+metadata/_custom_type_script = "uid://d0mgk7lia85k1"

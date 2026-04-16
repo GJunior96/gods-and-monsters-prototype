@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="DamagePolicy" load_steps=2 format=3 uid="uid://bcsrm47hkycls"]
+
+[ext_resource type="Script" uid="uid://fncejebq5o0l" path="res://scripts/systems/combat/hit/damage_policy.gd" id="1_61bf1"]
+
+[resource]
+script = ExtResource("1_61bf1")
+metadata/_custom_type_script = "uid://fncejebq5o0l"

@@ -18,10 +18,16 @@ func execute(_equipment, player, attack: AttackData):
 
 func _apply_damage(targets, attack: AttackData, player):
 	for enemy in targets:
-		enemy.take_damage(attack.damage)
 
 		var dir = (enemy.global_position - player.global_position).normalized()
-		enemy.apply_knockback(dir, attack.knockback_force)
+		var context = {
+			"damage": attack.damage,
+			"knockback": attack.knockback_force,
+			"source": player,
+			"direction": dir
+		}
+
+		attack.hit_policy.apply(enemy, context)
 
 
 func _on_hit_detected(targets: Array, attack: AttackData, player) -> void:
