@@ -6,6 +6,7 @@ extends CharacterBody2D
 @export var speed := 200.0
 @export var max_life := 100
 @export var starting_equipment_id: String
+var upgrades: Dictionary = {} # id -> UpgradeInstance
 
 var life := max_life
 var damage_cooldown := 0.5
@@ -143,3 +144,28 @@ func level_up():
 
 func equip(data: EquipmentData) -> void:
 	equipment_manager.equip(data, self)
+
+
+func add_upgrade(upgrade: UpgradeData) -> void:
+	if upgrades.has(upgrade.id):
+		var inst = upgrades[upgrade.id]
+
+		if inst.stacks < upgrade.max_stacks:
+			inst.stacks += 1
+	else:
+		var inst = UpgradeInstance.new()
+		inst.data = upgrade
+		upgrades[upgrade.id] = inst
+	
+	rebuild_upgrades()
+
+
+func rebuild_upgrades() -> void:
+	# clear run modifiers
+	equipment_manager.clear_global_modifiers()
+
+	# reset base stats if its necessary
+	#player.speed = 200.0
+
+	for inst in upgrades.values():
+		inst.data.apply(self, inst.stacks)

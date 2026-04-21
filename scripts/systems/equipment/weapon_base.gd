@@ -26,10 +26,10 @@ func try_attack() -> void:
 	if not can_attack:
 		return
 
-	var final_data = data.duplicate()
+	var final_data = player.equipment_manager.get_final_weapon_data(data)
 
-	for modifier in data.modifiers:
-		modifier.apply(final_data)
+	# for modifier in data.modifiers:
+	# 	modifier.apply(final_data)
 
 	var attack = final_data.attacks[0] # TODO: select attack based on pattern
 
