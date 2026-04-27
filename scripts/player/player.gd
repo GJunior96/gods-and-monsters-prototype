@@ -2,11 +2,16 @@ class_name Player
 extends CharacterBody2D
 
 @onready var equipment_manager = $EquipmentManager
+@onready var upgrade_manager = $UpgradeManager
 
-@export var speed := 200.0
-@export var max_life := 100
+# base stats -------------------------
+@export var base_speed := 200.0
+@export var base_max_life := 100
+# ------------------------------------
+
+var speed := base_speed
+var max_life := base_max_life
 @export var starting_equipment_id: String
-var upgrades: Dictionary = {} # id -> UpgradeInstance
 
 var life := max_life
 var damage_cooldown := 0.5
@@ -38,8 +43,9 @@ signal on_damage_taken
 
  
 func _ready():
+	equipment_manager.setup(self)
+	upgrade_manager.setup(self)
 	var equipment_data = ItemDatabase.get_item(starting_equipment_id)
-
 
 	equip(equipment_data)
 
@@ -66,7 +72,7 @@ func _physics_process(_delta):
 
 
 func update_target():
-	current_target = TargetingUtils._get_nearest_enemy(global_position)
+	current_target = TargetingUtils.get_nearest_enemy(global_position)
 
 	if current_target:
 		attack_direction = TargetingUtils.get_direction(current_target.global_position, global_position)
@@ -139,33 +145,8 @@ func level_up():
 
 	GlobalLogger.log("LEVELUP")
 
-	leveled_up.emit(level)
+	EventBus.level_up_requested.emit(self)
 
 
 func equip(data: EquipmentData) -> void:
 	equipment_manager.equip(data, self)
-
-
-func add_upgrade(upgrade: UpgradeData) -> void:
-	if upgrades.has(upgrade.id):
-		var inst = upgrades[upgrade.id]
-
-		if inst.stacks < upgrade.max_stacks:
-			inst.stacks += 1
-	else:
-		var inst = UpgradeInstance.new()
-		inst.data = upgrade
-		upgrades[upgrade.id] = inst
-	
-	rebuild_upgrades()
-
-
-func rebuild_upgrades() -> void:
-	# clear run modifiers
-	equipment_manager.clear_global_modifiers()
-
-	# reset base stats if its necessary
-	#player.speed = 200.0
-
-	for inst in upgrades.values():
-		inst.data.apply(self, inst.stacks)

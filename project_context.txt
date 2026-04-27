@@ -12,9 +12,14 @@
 │   │       ├── enemy_state_dead.tres
 │   │       ├── enemy_state_set_basic.tres
 │   │       └── enemy_state_stunned.tres
-│   └── equipment
-│       └── weapons
-│           └── sword_data.tres
+│   ├── equipment
+│   │   └── weapons
+│   │       ├── sword_data.tres
+│   │       └── sword_data.tres184606097.tmp
+│   └── upgrades
+│       ├── area_up.tres
+│       ├── damage_up.tres
+│       └── speed_up.tres
 ├── effects
 │   └── slash
 │       ├── arc_slash.gd
@@ -66,7 +71,9 @@
 │   │   ├── item_database.gd
 │   │   ├── item_database.gd.uid
 │   │   ├── logger.gd
-│   │   └── logger.gd.uid
+│   │   ├── logger.gd.uid
+│   │   ├── resource_loader.gd
+│   │   └── resource_loader.gd.uid
 │   ├── player
 │   │   ├── player.gd
 │   │   └── player.gd.uid
@@ -81,8 +88,6 @@
 │   │   ├── equipment
 │   │   │   ├── equipment_data.gd
 │   │   │   ├── equipment_data.gd.uid
-│   │   │   ├── item_database_data.gd
-│   │   │   ├── item_database_data.gd.uid
 │   │   │   ├── weapon_data.gd
 │   │   │   └── weapon_data.gd.uid
 │   │   └── shapes
@@ -137,15 +142,39 @@
 │   │   ├── targeting
 │   │   │   ├── targeting_utils.gd
 │   │   │   └── targeting_utils.gd.uid
+│   │   ├── upgrades
+│   │   │   ├── upgrade_manager.gd
+│   │   │   ├── upgrade_manager.gd.uid
+│   │   │   ├── upgrade_roll.gd
+│   │   │   └── upgrade_roll.gd.uid
 │   │   ├── xp_drop.gd
 │   │   └── xp_drop.gd.uid
 │   ├── ui
 │   │   ├── game_over_ui.gd
 │   │   ├── game_over_ui.gd.uid
-│   │   ├── upgrade_ui.gd
-│   │   ├── upgrade_ui.gd.uid
+│   │   ├── ui_manager.gd
+│   │   ├── ui_manager.gd.uid
+│   │   ├── upgrades
+│   │   │   ├── upgrade_card.gd
+│   │   │   ├── upgrade_card.gd.uid
+│   │   │   ├── upgrade_ui.gd
+│   │   │   └── upgrade_ui.gd.uid
 │   │   ├── xp_bar_ui.gd
 │   │   └── xp_bar_ui.gd.uid
+│   ├── upgrades
+│   │   ├── types
+│   │   │   ├── upgrade_add_equipment.gd
+│   │   │   ├── upgrade_add_equipment.gd.uid
+│   │   │   ├── upgrade_add_modifier.gd
+│   │   │   ├── upgrade_add_modifier.gd.uid
+│   │   │   ├── upgrade_stat.gd
+│   │   │   └── upgrade_stat.gd.uid
+│   │   ├── upgrade_data.gd
+│   │   ├── upgrade_data.gd.uid
+│   │   ├── upgrade_database.gd
+│   │   ├── upgrade_database.gd.uid
+│   │   ├── upgrade_instance.gd
+│   │   └── upgrade_instance.gd.uid
 │   └── utils
 │       ├── shape_utils.gd
 │       └── shape_utils.gd.uid
@@ -171,11 +200,204 @@
     ├── square 64.png.import
     └── —Pngtree—circle clipart purple circle_5553138.png:Zone.Identifier
 
-38 directories, 133 files
+43 directories, 157 files
 
 
 
 ===== ARQUIVOS EXPORTADOS =====
+====================================
+Arquivo: ./scripts/utils/shape_utils.gd
+Tipo: SCRIPT
+====================================
+class_name ShapeUtils
+
+static func arc(radius: float, thickness: float, angle: float, steps := 12) -> PackedVector2Array:
+	var points := []
+
+	var start_angle = deg_to_rad(-angle / 2)
+	var end_angle = deg_to_rad(angle / 2)
+
+	# outer
+	for i in range(steps + 1):
+		var t = i / float(steps)
+		var a = lerp(start_angle, end_angle, t)
+
+		var dir = Vector2(cos(a), sin(a))
+
+		var taper = sin(t * PI) # taper de 0 a 1 a 0 para criar um efeito de "afunilamento" no início e fim do arco
+		var offset = thickness * (1.0 - taper) * 0.5 # offset para manter o centro do arco consistente
+
+		points.append(dir * (radius - offset))
+
+	# inner
+	for i in range(steps, -1, -1):
+		var t = i / float(steps)
+		var a = lerp(start_angle, end_angle, t)
+		
+		var dir = Vector2(cos(a), sin(a))
+
+		var taper = sin(t * PI) # mesmo taper para a parte interna
+		var offset = thickness * (1.0 - taper) * 0.5 # mesmo offset para manter o centro consistente
+
+		points.append(dir * (radius - thickness + offset))
+
+
+	return points
+
+static func cone(radius: float, angle: float, steps := 12) -> PackedVector2Array:
+	var points := []
+
+	var start_angle = deg_to_rad(-angle / 2)
+	var end_angle = deg_to_rad(angle / 2)
+
+	for i in range(steps + 1):
+		var t = i / float(steps)
+		var a = lerp(start_angle, end_angle, t)
+
+		var dir = Vector2(cos(a), sin(a))
+		points.append(dir * radius)
+		
+	points.append(Vector2.ZERO) # centro do cone
+
+	return points
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/upgrades/upgrade_instance.gd
+Tipo: SCRIPT
+====================================
+class_name UpgradeInstance
+extends RefCounted
+
+var data: UpgradeData
+var stacks: int = 1
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/upgrades/upgrade_database.gd
+Tipo: SCRIPT
+====================================
+extends Node
+
+var upgrades: Array = []
+var _loaded := false
+
+func _ensure_loaded():
+	if _loaded:
+		return
+
+	upgrades = ResourceLoaderUtil._load_resources_from_folder("res://data/upgrades", UpgradeData.TYPE)
+	_loaded = true
+
+
+func get_available(palyer, manager) -> Array:
+	_ensure_loaded()
+
+	var result := []
+
+	for upgrade in upgrades:
+		if upgrade.can_offer(palyer, manager):
+			result.append(upgrade)
+
+	return result
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/upgrades/upgrade_data.gd
+Tipo: SCRIPT
+====================================
+class_name UpgradeData
+extends Resource
+
+const TYPE := "UpgradeData"
+@export var id: String
+@export var name: String
+@export var description: String
+
+@export var rarity: int = 1
+@export var weight := 1.0
+@export var tags: Array[String] = []
+
+@export var max_stacks: int = 1
+
+@export var modifiers: Array[AttackModifier]
+
+
+func can_offer(player, manager) -> bool:
+    var stacks = manager.get_stack(id)
+    return stacks < max_stacks
+
+
+func apply(player, manager) -> void:
+    for modifier in modifiers:
+        manager.add_modifier(modifier)
+    
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/upgrades/types/upgrade_stat.gd
+Tipo: SCRIPT
+====================================
+class_name UpgradeStat
+extends UpgradeData
+
+@export var life_bonus := 0
+@export var speed_bonus := 0.0
+
+
+func apply(player, manager) -> void:
+	var stacks = manager.get_stack(id)
+	player.max_life += life_bonus * stacks
+	player.speed += speed_bonus * stacks
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/upgrades/types/upgrade_add_modifier.gd
+Tipo: SCRIPT
+====================================
+class_name UpgradeAddModifier
+extends UpgradeData
+
+@export var modifier: AttackModifier
+
+func apply(player, manager) -> void:
+	# var stacks = manager.get_stack(id)
+	# for i in range(stacks):
+	player.equipment_manager.add_global_modifier(modifier)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/upgrades/types/upgrade_add_equipment.gd
+Tipo: SCRIPT
+====================================
+class_name UpgradeAddEquipment
+extends UpgradeData
+
+@export var equipment: EquipmentData
+
+func apply(player, stacks: int) -> void:
+	if stacks == 1:
+		player.equip(equipment)
+
+===== FIM DO ARQUIVO =====
+
+
 ====================================
 Arquivo: ./scripts/ui/xp_bar_ui.gd
 Tipo: SCRIPT
@@ -198,23 +420,36 @@ func _on_xp_changed(current, max):
 
 
 ====================================
-Arquivo: ./scripts/ui/upgrade_ui.gd
+Arquivo: ./scripts/ui/upgrades/upgrade_ui.gd
 Tipo: SCRIPT
 ====================================
-extends CanvasLayer
+extends Control
 
-@onready var player = get_tree().get_first_node_in_group("player")
+@onready var buttons = [
+	$CenterContainer/Panel/VBoxContainer/Option1,
+	$CenterContainer/Panel/VBoxContainer/Option2,
+	$CenterContainer/Panel/VBoxContainer/Option3
+]
 
-signal upgrade_finished
+var current_upgrades := []
+var player
+# extends CanvasLayer
+
+# @onready var player = get_tree().get_first_node_in_group("player")
+
+# signal upgrade_finished
+var manager
 
 func _ready():
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	manager = UpgradeManager.new()
 
-	GameManager.request_upgrade_screen.connect(show_upgrade)
+	#EventBus.request_upgrade_screen.connect(show_upgrade)
 
 
 func show_upgrade():
+	print("Showing upgrade screen")
 	visible = true
 
 
@@ -222,29 +457,121 @@ func hide_upgrade():
 	visible = false
 
 
-func _on_upgrade_damage_pressed() -> void:
-	if player:
-		player.weapon.upgrade("damage", 2)
+# func _on_upgrade_damage_pressed() -> void:
+# 	if player:
+# 		player.weapon.upgrade("damage", 2)
 
-	upgrade_finished.emit()
-	hide_upgrade()
-
-
-func _on_upgrade_speed_pressed() -> void:
-	if player:
-		player.weapon.upgrade("speed", 2)
-
-	upgrade_finished.emit()
-	hide_upgrade()
+# 	upgrade_finished.emit()
+# 	hide_upgrade()
 
 
-func _on_upgrade_fire_rate_pressed() -> void:
-	if player:
-		player.weapon.upgrade("fire_rate", 0.8)
+# func _on_upgrade_speed_pressed() -> void:
+# 	if player:
+# 		player.weapon.upgrade("speed", 2)
 
-	upgrade_finished.emit()
-	hide_upgrade()
+# 	upgrade_finished.emit()
+# 	hide_upgrade()
 
+
+# func _on_upgrade_fire_rate_pressed() -> void:
+# 	if player:
+# 		player.weapon.upgrade("fire_rate", 0.8)
+
+# 	upgrade_finished.emit()
+# 	hide_upgrade()
+
+# @export var card_scene: PackedScene
+# var player
+
+# func setup(player_ref):
+# 	player = player_ref
+# 	_show_upgrades()
+
+
+func _show_upgrades(p):
+	player = p
+	current_upgrades = UpgradeRoll.roll_upgrades(player, player.upgrade_manager, buttons.size())
+
+	for i in range(buttons.size()):
+		if i < current_upgrades.size():
+			var up = current_upgrades[i]
+			buttons[i].visible = true
+			buttons[i].text = _format_upgrade(up)
+			buttons[i].pressed.connect(_on_upgrade_selected.bind(i))
+		else:
+			buttons[i].visible = false
+
+	show()
+	get_tree().paused = true
+
+
+func _on_upgrade_selected(index):
+	var upgrade = current_upgrades[index]
+
+	player.upgrade_manager.apply_upgrade(upgrade)
+
+	_close()
+
+
+func _close():
+	get_tree().paused = false
+	hide()
+
+
+func _format_upgrade(upgrade: UpgradeData) -> String:
+	return "%s\n%s" % [upgrade.name, upgrade.description]
+
+	# var upgrades = UpgradeRoll.roll_upgrades(player, manager, 3)
+
+	# for up in upgrades:
+	# 	var card = card_scene.instantiate()
+	# 	add_child(card)
+	# 	card.setup(up, player)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/ui/upgrades/upgrade_card.gd
+Tipo: SCRIPT
+====================================
+extends Button
+
+var upgrade: UpgradeData
+var player
+
+func setup(upgrade_data: UpgradeData, player_ref):
+	upgrade = upgrade_data
+	player = player_ref
+	text = upgrade.name
+
+
+func _pressed():
+	player.add_upgrade(upgrade)
+	get_tree().paused = false
+	get_parent().queue_free()
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/ui/ui_manager.gd
+Tipo: SCRIPT
+====================================
+extends Node
+
+
+@onready var ui_layer = $"../UI"
+
+func _ready():
+	EventBus.level_up_requested.connect(_on_level_up)
+
+
+func _on_level_up(player):
+	var ui = preload("res://scenes/ui/UpgradeUI.tscn").instantiate()
+	ui_layer.add_child(ui)
+	ui._show_upgrades(player)
 
 ===== FIM DO ARQUIVO =====
 
@@ -291,6 +618,84 @@ func _on_body_entered(body):
 	if body is Player:
 		body.gain_xp(xp_value)
 		queue_free()
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/systems/upgrades/upgrade_roll.gd
+Tipo: SCRIPT
+====================================
+class_name UpgradeRoll
+
+static func roll_upgrades(player, manager, count := 3) -> Array:
+	var pool = UpgradeDatabase.get_available(player, manager)
+
+	var result := []
+
+	for i in range(count):
+		if pool.is_empty():
+			break
+		
+		var chosen = _weighted_random(pool)
+		result.append(chosen)
+		pool.erase(chosen)
+
+	return result
+
+
+static func _weighted_random(list):
+	var total_weight = 0.0
+	for item in list:
+		total_weight += item.weight
+
+	var r = randf() * total_weight
+
+	for item in list:
+		r -= item.weight
+		if r <= 0:
+			return item
+
+	return list[0] # Fallback, should not happen
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/systems/upgrades/upgrade_manager.gd
+Tipo: SCRIPT
+====================================
+class_name UpgradeManager
+extends Node
+
+var player
+var upgrades := {} # id -> stacks
+var global_modifiers: Array[AttackModifier] = []
+
+
+func setup(p):
+	player = p
+
+
+func apply_upgrade(upgrade: UpgradeData):
+	var current = upgrades.get(upgrade.id, 0)
+	upgrades[upgrade.id] = current + 1
+
+	upgrade.apply(player, self)
+
+
+func get_stack(id: String) -> int:
+	return upgrades.get(id, 0)
+
+
+func add_modifier(modifier: AttackModifier) -> void:
+	global_modifiers.append(modifier)
+
+
+func get_modifiers() -> Array:
+	return global_modifiers
 
 
 ===== FIM DO ARQUIVO =====
@@ -356,11 +761,10 @@ func _process(_delta) -> void:
 func try_attack() -> void:
 	if not can_attack:
 		return
+	var final_data = player.equipment_manager.get_final_weapon_data(data)
 
-	var final_data = data.duplicate()
-
-	for modifier in data.modifiers:
-		modifier.apply(final_data)
+	# for modifier in data.modifiers:
+	# 	modifier.apply(final_data)
 
 	var attack = final_data.attacks[0] # TODO: select attack based on pattern
 
@@ -397,6 +801,17 @@ func try_attack() -> void:
 
 
 ====================================
+Arquivo: ./scripts/systems/equipment/slot_type.gd
+Tipo: SCRIPT
+====================================
+class_name SlotType
+
+enum Type { WEAPON, DEFENSE, MAGIC }
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
 Arquivo: ./scripts/systems/equipment/equipment_type.gd
 Tipo: SCRIPT
 ====================================
@@ -417,16 +832,28 @@ extends Node2D
 
 
 @export var slot_type: SlotType.Type
+@export var is_multi := false
 
-var current_equipment: EquipmentBase
+#var current_equipment: EquipmentBase
+var equipments: Array[EquipmentBase] = []
 
 
 func equip(equipment: EquipmentBase) -> void:
-	if current_equipment:
-		current_equipment.queue_free()
+	if is_multi:
+		equipments.append(equipment)
+		add_child(equipment)
+	else:
+		if equipments.size() > 0:
+			equipments[0].queue_free()
+			equipments.clear()
 
-	current_equipment = equipment
-	add_child(equipment)
+		equipments.append(equipment)
+		add_child(equipment)
+	# if current_equipment:
+	# 	current_equipment.queue_free()
+
+	# current_equipment = equipment
+	# add_child(equipment)
 
 
 ===== FIM DO ARQUIVO =====
@@ -442,9 +869,15 @@ extends Node
 @onready var weapon_slot: EquipmentSlot = $WeaponSlot
 #@onready var defense_slot: EquipmentSlot = $DefenseSlot
 #@onready var magic_slot: EquipmentSlot = $MagicSlot
-
+var player: Node2D
 #var slots := {}
 var slots: Dictionary[SlotType.Type, EquipmentSlot] = {}
+var global_modifiers: Array[AttackModifier] = []
+
+
+func setup(_player: Node2D) -> void:
+	player = _player
+
 
 func _ready():
 	EventBus.attack_requested.connect(_on_attack_requested)
@@ -462,8 +895,33 @@ func equip(data: EquipmentData, player) -> void:
 
 
 func _on_attack_requested() -> void:
-	if weapon_slot.current_equipment:
-		weapon_slot.current_equipment.try_attack()
+	var slot = slots[SlotType.Type.WEAPON]
+
+	for eq in slot.equipments:
+		if eq is WeaponBase:
+			eq.try_attack()
+
+	# if weapon_slot.current_equipment:
+	# 	weapon_slot.current_equipment.try_attack()
+
+
+func get_final_weapon_data(base_data: WeaponData) -> WeaponData:
+	var final = base_data.duplicate(true)
+	for mod in base_data.modifiers:
+		mod.apply(final)
+
+	for mod in player.upgrade_manager.get_modifiers():
+		mod.apply(final)
+
+	return final
+
+
+func add_global_modifier(modifier: AttackModifier) -> void:
+	global_modifiers.append(modifier)
+
+
+func clear_global_modifiers() -> void:
+	global_modifiers.clear()
 
 
 ===== FIM DO ARQUIVO =====
@@ -559,6 +1017,37 @@ func get_available_enemies():
 
 
 ====================================
+Arquivo: ./scripts/systems/combat/modifiers/damage_modifier.gd
+Tipo: SCRIPT
+====================================
+class_name DamageModifier
+extends AttackModifier
+
+@export var bonus_damage: int
+
+func apply(data: WeaponData):
+	data.damage += bonus_damage
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/systems/combat/modifiers/cooldown_modifier.gd
+Tipo: SCRIPT
+====================================
+class_name CooldownModifier
+extends AttackModifier
+
+@export var reduction: float
+
+func apply(data: WeaponData) -> void:
+	data.cooldown *= (1.0 - reduction)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
 Arquivo: ./scripts/systems/combat/modifiers/attack_modifier.gd
 Tipo: SCRIPT
 ====================================
@@ -645,6 +1134,25 @@ extends HitPolicy
 func apply(target: Node, context: Dictionary) -> void:
 	for policy in policies:
 		policy.apply(target, context)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/systems/combat/attacks/attack_pattern_projectile.gd
+Tipo: SCRIPT
+====================================
+class_name ProjectileAttack
+extends AttackPattern
+
+func execute(weapon, player, data):
+	var projectile = data.projectile_scene.instantiate()
+
+	projectile.global_position = weapon.global_position
+	projectile.direction = player.get_aim_direction()
+
+	weapon.get_tree().current_scene.add_child(projectile)
 
 
 ===== FIM DO ARQUIVO =====
@@ -797,24 +1305,14 @@ func create_instance(player) -> EquipmentBase:
 
 
 ====================================
-Arquivo: ./scripts/resources/equipment/item_database_data.gd
-Tipo: SCRIPT
-====================================
-extends Resource
-class_name ItemDatabaseData
-
-@export var items: Array[EquipmentData]
-
-===== FIM DO ARQUIVO =====
-
-
-====================================
 Arquivo: ./scripts/resources/equipment/equipment_data.gd
 Tipo: SCRIPT
 ====================================
 class_name EquipmentData
 extends Resource
 
+const TYPE := "EquipmentData"
+ 
 @export var id: String
 @export var name: String
 @export var description: String
@@ -877,10 +1375,12 @@ class_name Player
 extends CharacterBody2D
 
 @onready var equipment_manager = $EquipmentManager
+@onready var upgrade_manager = $UpgradeManager
 
 @export var speed := 200.0
 @export var max_life := 100
 @export var starting_equipment_id: String
+var upgrades: Dictionary = {} # id -> UpgradeInstance
 
 var life := max_life
 var damage_cooldown := 0.5
@@ -912,8 +1412,9 @@ signal on_damage_taken
 
  
 func _ready():
+	equipment_manager.setup(self)
+	upgrade_manager.setup(self)
 	var equipment_data = ItemDatabase.get_item(starting_equipment_id)
-
 
 	equip(equipment_data)
 
@@ -1013,12 +1514,118 @@ func level_up():
 
 	GlobalLogger.log("LEVELUP")
 
-	leveled_up.emit(level)
+	#leveled_up.emit(level)
+
+	EventBus.level_up_requested.emit(self)
 
 
 func equip(data: EquipmentData) -> void:
 	equipment_manager.equip(data, self)
 
+
+func add_upgrade(upgrade: UpgradeData) -> void:
+	if upgrades.has(upgrade.id):
+		var inst = upgrades[upgrade.id]
+
+		if inst.stacks < upgrade.max_stacks:
+			inst.stacks += 1
+	else:
+		var inst = UpgradeInstance.new()
+		inst.data = upgrade
+		upgrades[upgrade.id] = inst
+	
+	rebuild_upgrades()
+
+
+func rebuild_upgrades() -> void:
+	# clear run modifiers
+	equipment_manager.clear_global_modifiers()
+
+	# reset base stats if its necessary
+	#player.speed = 200.0
+
+	for inst in upgrades.values():
+		inst.data.apply(self, inst.stacks)
+
+
+func get_availableupgrades(all_upgrades: Array[UpgradeData]) -> Array[UpgradeData]:
+	var result := []
+
+	for up in all_upgrades:
+		if upgrades.has(up.id):
+			var inst = upgrades[up.id]
+
+			if inst.stacks >= up.max_stacks:
+				continue
+
+		result.append(up)
+
+	return result
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/global/resource_loader.gd
+Tipo: SCRIPT
+====================================
+class_name ResourceLoaderUtil
+extends Node
+
+static func _load_resources_from_folder(path: String, type_check = null) -> Array:
+	var result := []
+
+	var dir = DirAccess.open(path)
+	if dir == null:
+		push_error("Folder not found: " + path)
+		return result
+	
+	for file in dir .get_files():
+		if file.ends_with(".tres"):
+			var res = load(path + "/" + file)
+
+			if type_check == null or res.TYPE == (type_check):
+				result.append(res)
+
+	for folder in dir.get_directories():
+		result += _load_resources_from_folder(path + "/" + folder, type_check)
+
+	return result
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/global/logger.gd
+Tipo: SCRIPT
+====================================
+
+extends Node
+
+enum LogLevel { INFO, WARN, ERROR }
+
+var current_level := LogLevel.INFO
+
+func log(message: String, level: LogLevel = LogLevel.INFO):
+	if not OS.is_debug_build():
+		return
+
+	if level < current_level:
+		return
+
+	var prefix := ""
+
+	match level:
+		LogLevel.INFO:
+			prefix = "[INFO] "
+		LogLevel.WARN:
+			prefix = "[WARN] "
+		LogLevel.ERROR:
+			prefix = "[ERROR] "
+
+	print(prefix + message)
 
 ===== FIM DO ARQUIVO =====
 
@@ -1030,25 +1637,93 @@ Tipo: SCRIPT
 extends Node
 
 var items_by_id := {}
+var _loaded := false
 
-func _ready():
-	_load_items_from_folder("res://data/equipment")
+func _ensure_loaded():
+	if _loaded:
+		return
 
+	var items = ResourceLoaderUtil._load_resources_from_folder("res://data/equipment", EquipmentData.TYPE)
 
-func _load_items_from_folder(path: String):
-	var dir = DirAccess.open(path)
+	for item in items:
+		items_by_id[item.id] = item
 
-	for file in dir.get_files():
-		if file.ends_with(".tres"):
-			var item = load(path + "/" + file)
-			items_by_id[item.id] = item
+	_loaded = true
 
-	for folder in dir.get_directories():
-		_load_items_from_folder(path + "/" + folder)
-		
 
 func get_item(id: String) -> EquipmentData:
+	_ensure_loaded()
 	return items_by_id.get(id)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/global/game_manager.gd
+Tipo: SCRIPT
+====================================
+extends Node
+
+var time_survived := 0.0
+var is_game_over := false
+
+#signal request_upgrade_screen
+signal request_game_over_screen(time)
+
+func _ready():
+	var player = get_tree().get_first_node_in_group("player")
+	#var upgrade_ui = get_tree().get_first_node_in_group("upgrade_ui")
+	var game_over_iu = get_tree().get_first_node_in_group("game_over_ui")
+
+	player.leveled_up.connect(_on_player_leveled_up)
+	player.game_over.connect(_on_game_over)
+	#upgrade_ui.upgrade_finished.connect(_on_upgrade_finished)
+	game_over_iu.restart_game.connect(_on_restart_game)
+
+
+func _process(delta):
+	if is_game_over:
+		return
+
+	time_survived += delta
+
+
+func get_difficulty_multiplier() -> float:
+	var minutes = time_survived / 60.0
+	return 1.0 + (minutes * 0.3)
+
+
+func _on_game_over():
+	is_game_over = true
+	get_tree().paused = true
+	GlobalLogger.log("Game Over! Tempo sobrevivido: %s" % time_survived)
+
+	request_game_over_screen.emit(time_survived)
+
+
+func pause_game():
+	get_tree().paused = true
+
+
+func resume_game():
+	get_tree().paused = false
+
+
+func _on_restart_game():
+	resume_game()
+	get_tree().reload_current_scene()
+
+
+func _on_player_leveled_up(level):
+	print("shouldnt be called")
+	#pause_game()
+	#EventBus.request_upgrade_screen.emit()
+	#EventBus.leve
+
+
+func _on_upgrade_finished():
+	resume_game()
 
 
 ===== FIM DO ARQUIVO =====
@@ -1065,7 +1740,56 @@ signal attack_requested
 signal damage_taken(target, amount)
 signal enemy_killed(enemy)
 signal equipment_quipped(equipment)
+signal level_up_requested(player)
+signal request_upgrade_screen
 
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/global/enemy_manager.gd
+Tipo: SCRIPT
+====================================
+extends Node
+
+var enemies: Array = []
+
+func register_enemy(enemy: Enemy):
+	enemies.append(enemy)
+
+
+func unregister_enemy(enemy: Enemy):
+	enemies.erase(enemy)
+
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/enemies/states/enemy_stunned_state.gd
+Tipo: SCRIPT
+====================================
+class_name EnemyStunnedState
+extends EnemyState
+
+var timer := 0.0
+
+func enter(enemy):
+	timer = data.duration
+
+	if data.stop_on_enter:
+		enemy.velocity = Vector2.ZERO
+
+
+func physics_update(enemy, delta):
+	timer -= delta
+
+	enemy.velocity = enemy.velocity.move_toward(Vector2.ZERO, data.friction * delta)
+	enemy.move_and_slide()
+
+	if timer <= 0:
+		enemy.change_state(enemy.chase_state)
 
 ===== FIM DO ARQUIVO =====
 
@@ -1080,6 +1804,65 @@ extends Resource
 @export var chase: EnemyStateData
 @export var stunned: EnemyStateData
 @export var dead: EnemyStateData
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/enemies/states/enemy_state.gd
+Tipo: SCRIPT
+====================================
+class_name EnemyState
+extends RefCounted
+
+var data: EnemyStateData
+
+func setup(state_data: EnemyStateData):
+    data = state_data
+    return self
+    
+
+func enter(_enemy): pass
+func exit(_enemy): pass
+func physics_update(_enemy, _delta): pass
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/enemies/states/enemy_dead_state.gd
+Tipo: SCRIPT
+====================================
+class_name EnemyDeadState
+extends EnemyState
+
+func enter(enemy):
+	enemy.velocity = Vector2.ZERO
+	enemy.set_physics_process(false)
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./scripts/enemies/states/enemy_chase_state.gd
+Tipo: SCRIPT
+====================================
+class_name EnemyChaseState
+extends EnemyState
+
+func physics_update(_enemy, _delta):
+	if _enemy.dead or _enemy.target == null:
+		return
+
+	var direction = (_enemy.target.global_position - _enemy.global_position). normalized()
+	var desired_velocity = direction * _enemy.speed * data.speed_multiplier
+
+	# Aplica fricção
+	_enemy.velocity = _enemy.velocity.move_toward(desired_velocity, data.friction * _delta)
+	_enemy.move_and_slide()
 
 
 ===== FIM DO ARQUIVO =====
@@ -1169,21 +1952,32 @@ func take_damage(amount: int):
 
 
 func die():
+	if dead:
+		return
+
 	dead = true
 
 	change_state(dead_state)
 	# Desliga colisao imediatamente
-	$CollisionShape2D.disabled = true
+	$CollisionShape2D.set_deferred("disabled", true)
 
 	if xp_drop_scene:
-		var xp = xp_drop_scene.instantiate()
-		get_tree().current_scene.add_child(xp)
-		xp.global_position = global_position
-		xp.setup(xp_value)
+		call_deferred("_spawn_xp")
+		# var xp = xp_drop_scene.instantiate()
+		# get_tree().current_scene.add_child(xp)
+		# xp.global_position = global_position
+		# xp.setup(xp_value)
 
 	GlobalLogger.log("Freeing: " + name)
 	EnemyManager.unregister_enemy(self)
-	queue_free()
+	call_deferred("queue_free")
+
+
+func _spawn_xp():
+	var xp = xp_drop_scene.instantiate()
+	get_tree().current_scene.add_child(xp)
+	xp.global_position = global_position
+	xp.setup(xp_value)
 
 
 func change_state(new_state: EnemyState):
@@ -1217,48 +2011,56 @@ Tipo: SCENE
 ====================================
 [gd_scene load_steps=2 format=3 uid="uid://bcdx48b1luddu"]
 
-[ext_resource type="Script" uid="uid://bddwdj84seie" path="res://scripts/ui/upgrade_ui.gd" id="1_t4xms"]
+[ext_resource type="Script" uid="uid://bddwdj84seie" path="res://scripts/ui/upgrades/upgrade_ui.gd" id="1_t4xms"]
 
-[node name="UpgradeUi" type="CanvasLayer" groups=["upgrade_ui"]]
-script = ExtResource("1_t4xms")
-
-[node name="Panel" type="Panel" parent="."]
+[node name="UpgradeUI" type="Control"]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_t4xms")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+[node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -4.0
-offset_top = -29.5
-offset_right = 4.0
-offset_bottom = 29.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
-alignment = 1
 
-[node name="LEVEL UP" type="Label" parent="Panel/VBoxContainer"]
+[node name="Panel" type="Panel" parent="CenterContainer"]
 layout_mode = 2
 
-[node name="UpgradeDamage" type="Button" parent="Panel/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer/Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Option1" type="Button" parent="CenterContainer/Panel/VBoxContainer"]
 layout_mode = 2
 
-[node name="UpgradeSpeed" type="Button" parent="Panel/VBoxContainer"]
+[node name="Option2" type="Button" parent="CenterContainer/Panel/VBoxContainer"]
 layout_mode = 2
 
-[node name="UpgradeFireRate" type="Button" parent="Panel/VBoxContainer"]
+[node name="Option3" type="Button" parent="CenterContainer/Panel/VBoxContainer"]
 layout_mode = 2
-
-[connection signal="pressed" from="Panel/VBoxContainer/UpgradeDamage" to="." method="_on_upgrade_damage_pressed"]
-[connection signal="pressed" from="Panel/VBoxContainer/UpgradeSpeed" to="." method="_on_upgrade_speed_pressed"]
-[connection signal="pressed" from="Panel/VBoxContainer/UpgradeFireRate" to="." method="_on_upgrade_fire_rate_pressed"]
 
 
 ===== FIM DO ARQUIVO =====
@@ -1363,12 +2165,13 @@ texture = ExtResource("1_iwl14")
 Arquivo: ./scenes/player/player.tscn
 Tipo: SCENE
 ====================================
-[gd_scene load_steps=8 format=3 uid="uid://bjcrg74hogbu2"]
+[gd_scene load_steps=9 format=3 uid="uid://bjcrg74hogbu2"]
 
 [ext_resource type="Script" uid="uid://n68w8i2nmcnq" path="res://scripts/player/player.gd" id="2_dovo2"]
 [ext_resource type="Texture2D" uid="uid://dkb7yd6mldmh1" path="res://sprites temporarios/square 24.png" id="2_lvxji"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="3_75vfm"]
 [ext_resource type="Script" uid="uid://cs8xwh6gcprqm" path="res://scripts/systems/equipment/equipment_manager.gd" id="5_p47bc"]
+[ext_resource type="Script" uid="uid://ff1dw4k8ghdf" path="res://scripts/systems/upgrades/upgrade_manager.gd" id="6_0owmy"]
 [ext_resource type="Script" uid="uid://c0sm2bon62rk1" path="res://scripts/systems/equipment/equipment_slot.gd" id="6_75vfm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_lvxji"]
@@ -1409,6 +2212,10 @@ script = ExtResource("6_75vfm")
 [node name="DefenseSlot" type="Node2D" parent="EquipmentManager"]
 
 [node name="MagicSlot" type="Node2D" parent="EquipmentManager"]
+
+[node name="UpgradeManager" type="Node" parent="."]
+script = ExtResource("6_0owmy")
+metadata/_custom_type_script = "uid://ff1dw4k8ghdf"
 
 
 ===== FIM DO ARQUIVO =====
@@ -1575,7 +2382,7 @@ Tipo: SCENE
 [ext_resource type="PackedScene" uid="uid://gx3ee0mq62ff" path="res://scenes/enemies/enemyTank.tscn" id="4_5vw27"]
 [ext_resource type="Script" uid="uid://coh3vo3ncnwe8" path="res://scripts/ui/xp_bar_ui.gd" id="5_7mycd"]
 [ext_resource type="PackedScene" uid="uid://ddayxe2ujmpub" path="res://scenes/systems/enemy_spawner.tscn" id="5_lquwl"]
-[ext_resource type="PackedScene" uid="uid://bcdx48b1luddu" path="res://scenes/ui/UpgradeUI.tscn" id="6_7mycd"]
+[ext_resource type="Script" uid="uid://rrfdkxoey2a5" path="res://scripts/ui/ui_manager.gd" id="8_5vw27"]
 
 [node name="Main" type="Node2D"]
 position = Vector2(-20, -47)
@@ -1588,6 +2395,7 @@ rotation = 3.1415927
 enemy_scenes = Array[PackedScene]([ExtResource("3_1bvp3"), ExtResource("3_272bh"), ExtResource("4_5vw27")])
 
 [node name="GameOverUi" parent="." instance=ExtResource("4_1bvp3")]
+visible = false
 
 [node name="XPBar" type="CanvasLayer" parent="."]
 script = ExtResource("5_7mycd")
@@ -1597,7 +2405,10 @@ visible = false
 offset_right = 73.0
 offset_bottom = 14.0
 
-[node name="UpgradeUi" parent="." instance=ExtResource("6_7mycd")]
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="UIManager" type="Node" parent="."]
+script = ExtResource("8_5vw27")
 
 
 ===== FIM DO ARQUIVO =====
@@ -1634,7 +2445,7 @@ extends Node2D
 
 @onready var hit_area: Area2D = $Area2D
 @onready var collision: CollisionPolygon2D = $Area2D/CollisionPolygon2D
-@onready var inner_area: Area2D = $InnerArea2D
+#@onready var inner_area: Area2D = $InnerArea2D
 
 @export var is_debug := false
 
@@ -1704,8 +2515,9 @@ func _set_hit_active(active: bool) -> void:
 	_hit_active = active
 	if hit_area:
 		hit_area.monitoring = active
-	if inner_area:
-		inner_area.monitoring = active
+	# if inner_area:
+	# 	print("really")
+	# 	inner_area.monitoring = active
 
 
 func _on_area_2d_area_entered(area: Area2D) -> void:
@@ -1722,49 +2534,133 @@ func _on_area_2d_area_entered(area: Area2D) -> void:
 
 
 ====================================
+Arquivo: ./data/upgrades/speed_up.tres
+Tipo: TRES
+====================================
+[gd_resource type="Resource" script_class="UpgradeAddModifier" load_steps=3 format=3 uid="uid://btiu76wyb0vvu"]
+
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="1_g10d7"]
+[ext_resource type="Script" uid="uid://d3vvhfk3x2h8n" path="res://scripts/upgrades/types/upgrade_add_modifier.gd" id="1_ssr7a"]
+
+[resource]
+script = ExtResource("1_ssr7a")
+id = "speed_upgrade"
+name = "Speed Upgrade"
+metadata/_custom_type_script = "uid://d3vvhfk3x2h8n"
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./data/upgrades/damage_up.tres
+Tipo: TRES
+====================================
+[gd_resource type="Resource" script_class="UpgradeAddModifier" load_steps=5 format=3 uid="uid://bqskqik2xdawt"]
+
+[ext_resource type="Script" uid="uid://bg3kgbmttywrr" path="res://scripts/systems/combat/modifiers/damage_modifier.gd" id="1_8t7fn"]
+[ext_resource type="Script" uid="uid://d3vvhfk3x2h8n" path="res://scripts/upgrades/types/upgrade_add_modifier.gd" id="1_b7b65"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_qc84x"]
+
+[sub_resource type="Resource" id="Resource_0he5s"]
+script = ExtResource("1_8t7fn")
+metadata/_custom_type_script = "uid://bg3kgbmttywrr"
+
+[resource]
+script = ExtResource("1_b7b65")
+modifier = SubResource("Resource_0he5s")
+id = "damage_upgrade"
+name = "Damage Upgrade"
+metadata/_custom_type_script = "uid://d3vvhfk3x2h8n"
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
+Arquivo: ./data/upgrades/area_up.tres
+Tipo: TRES
+====================================
+[gd_resource type="Resource" script_class="UpgradeAddModifier" load_steps=5 format=3 uid="uid://ost0nat4bjji"]
+
+[ext_resource type="Script" uid="uid://d3vvhfk3x2h8n" path="res://scripts/upgrades/types/upgrade_add_modifier.gd" id="1_bunus"]
+[ext_resource type="Script" uid="uid://dpojxly5mhlk7" path="res://scripts/systems/combat/modifiers/area_modifier.gd" id="1_jkxta"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_jj3x0"]
+
+[sub_resource type="Resource" id="Resource_iow74"]
+script = ExtResource("1_jkxta")
+metadata/_custom_type_script = "uid://dpojxly5mhlk7"
+
+[resource]
+script = ExtResource("1_bunus")
+modifier = SubResource("Resource_iow74")
+id = "area_upgrade"
+name = "Area Upgrade"
+metadata/_custom_type_script = "uid://d3vvhfk3x2h8n"
+
+
+===== FIM DO ARQUIVO =====
+
+
+====================================
 Arquivo: ./data/equipment/weapons/sword_data.tres
 Tipo: TRES
 ====================================
-[gd_resource type="Resource" script_class="WeaponData" load_steps=14 format=3 uid="uid://sa73tsldjckv"]
+[gd_resource type="Resource" script_class="WeaponData" load_steps=20 format=3 uid="uid://dnqbqfgefxr0v"]
 
 [ext_resource type="Script" uid="uid://crjms84mooixl" path="res://scripts/systems/combat/attacks/attack_pattern_melee.gd" id="1_my68t"]
 [ext_resource type="PackedScene" uid="uid://c6m2m5mov0tcc" path="res://effects/slash/arc_slash.tscn" id="2_pc32y"]
-[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_rgl6o"]
 [ext_resource type="Script" uid="uid://bislmwbuulstf" path="res://scripts/resources/equipment/weapon_data.gd" id="3_pc32y"]
 [ext_resource type="Script" uid="uid://6p1kdo02pawy" path="res://scripts/resources/attacks/attack_data.gd" id="3_sy21l"]
-[ext_resource type="Resource" uid="uid://bjvuiada4qxhv" path="res://data/combat/hit/composite_hit.tres" id="4_jyf0i"]
 [ext_resource type="Script" uid="uid://bsknupp63dlxw" path="res://scripts/resources/shapes/cone_shape.gd" id="4_okgb1"]
+[ext_resource type="Script" uid="uid://bn40ld13rhgxn" path="res://scripts/systems/combat/hit/hit_policy.gd" id="4_ola51"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="4_rgl6o"]
+[ext_resource type="Script" uid="uid://fncejebq5o0l" path="res://scripts/systems/combat/hit/damage_policy.gd" id="5_1ay0g"]
+[ext_resource type="Script" uid="uid://dy4fgv2rbd0th" path="res://scripts/systems/combat/hit/composite_hit_policy.gd" id="5_5wuh4"]
 [ext_resource type="Script" uid="uid://bmejlq1oy7ska" path="res://scripts/resources/shapes/arc_shape.gd" id="5_sy21l"]
+[ext_resource type="Script" uid="uid://d0mgk7lia85k1" path="res://scripts/systems/combat/hit/knockback_policy.gd" id="6_b3yfv"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="7_jyf0i"]
 
-[sub_resource type="Resource" id="Resource_lexvb"]
+[sub_resource type="Resource" id="Resource_1ay0g"]
 script = ExtResource("1_my68t")
 metadata/_custom_type_script = "uid://crjms84mooixl"
 
-[sub_resource type="Resource" id="Resource_jyf0i"]
+[sub_resource type="Resource" id="Resource_g57gn"]
+script = ExtResource("5_1ay0g")
+metadata/_custom_type_script = "uid://fncejebq5o0l"
+
+[sub_resource type="Resource" id="Resource_dbhko"]
+script = ExtResource("6_b3yfv")
+metadata/_custom_type_script = "uid://d0mgk7lia85k1"
+
+[sub_resource type="Resource" id="Resource_ola51"]
+script = ExtResource("5_5wuh4")
+policies = Array[ExtResource("4_ola51")]([SubResource("Resource_g57gn"), SubResource("Resource_dbhko")])
+metadata/_custom_type_script = "uid://dy4fgv2rbd0th"
+
+[sub_resource type="Resource" id="Resource_5wuh4"]
 script = ExtResource("4_okgb1")
 metadata/_custom_type_script = "uid://bsknupp63dlxw"
 
-[sub_resource type="Resource" id="Resource_okgb1"]
+[sub_resource type="Resource" id="Resource_b3yfv"]
 script = ExtResource("5_sy21l")
 metadata/_custom_type_script = "uid://bmejlq1oy7ska"
 
-[sub_resource type="Resource" id="Resource_cjmyt"]
+[sub_resource type="Resource" id="Resource_tuh14"]
 script = ExtResource("3_sy21l")
 attack_scene = ExtResource("2_pc32y")
-hit_policy = ExtResource("4_jyf0i")
-shape = SubResource("Resource_okgb1")
-hit_shape = SubResource("Resource_jyf0i")
+hit_policy = SubResource("Resource_ola51")
+shape = SubResource("Resource_b3yfv")
+hit_shape = SubResource("Resource_5wuh4")
 metadata/_custom_type_script = "uid://6p1kdo02pawy"
 
 [resource]
 script = ExtResource("3_pc32y")
 weapon_scene = ExtResource("4_rgl6o")
-attack_pattern = SubResource("Resource_lexvb")
-attacks = Array[ExtResource("3_sy21l")]([SubResource("Resource_cjmyt")])
-cooldown = 2.0
+attack_pattern = SubResource("Resource_1ay0g")
+attacks = Array[ExtResource("3_sy21l")]([SubResource("Resource_tuh14")])
 id = "weapon_sword_basic"
-name = "Basic Sword"
+name = "Sword Basic"
 metadata/_custom_type_script = "uid://bislmwbuulstf"
 
 

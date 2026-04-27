@@ -20,7 +20,6 @@ var damage: int
 # ---------------------------------------
 
 # state vars -----------------------------
-#@export var stun_duration := 0.15
 var current_state: EnemyState
 var chase_state: EnemyState
 var stunned_state: EnemyState
@@ -78,21 +77,29 @@ func take_damage(amount: int):
 
 
 func die():
+	if dead:
+		return
+
 	dead = true
 
 	change_state(dead_state)
 	# Desliga colisao imediatamente
-	$CollisionShape2D.disabled = true
+	$CollisionShape2D.set_deferred("disabled", true)
 
 	if xp_drop_scene:
-		var xp = xp_drop_scene.instantiate()
-		get_tree().current_scene.add_child(xp)
-		xp.global_position = global_position
-		xp.setup(xp_value)
+		call_deferred("_spawn_xp")
+
 
 	GlobalLogger.log("Freeing: " + name)
 	EnemyManager.unregister_enemy(self)
-	queue_free()
+	call_deferred("queue_free")
+
+
+func _spawn_xp():
+	var xp = xp_drop_scene.instantiate()
+	get_tree().current_scene.add_child(xp)
+	xp.global_position = global_position
+	xp.setup(xp_value)
 
 
 func change_state(new_state: EnemyState):

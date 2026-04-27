@@ -1,7 +1,16 @@
-[gd_resource type="Resource" script_class="UpgradeAddModifier" load_steps=2 format=3 uid="uid://ost0nat4bjji"]
+[gd_resource type="Resource" script_class="UpgradeAddModifier" load_steps=5 format=3 uid="uid://ost0nat4bjji"]
 
 [ext_resource type="Script" uid="uid://d3vvhfk3x2h8n" path="res://scripts/upgrades/types/upgrade_add_modifier.gd" id="1_bunus"]
+[ext_resource type="Script" uid="uid://dpojxly5mhlk7" path="res://scripts/systems/combat/modifiers/area_modifier.gd" id="1_jkxta"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_jj3x0"]
+
+[sub_resource type="Resource" id="Resource_iow74"]
+script = ExtResource("1_jkxta")
+metadata/_custom_type_script = "uid://dpojxly5mhlk7"
 
 [resource]
 script = ExtResource("1_bunus")
+modifier = SubResource("Resource_iow74")
+id = "area_upgrade"
+name = "Area Upgrade"
 metadata/_custom_type_script = "uid://d3vvhfk3x2h8n"

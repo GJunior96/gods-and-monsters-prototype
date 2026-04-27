@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://bjcrg74hogbu2"]
+[gd_scene load_steps=9 format=3 uid="uid://bjcrg74hogbu2"]
 
 [ext_resource type="Script" uid="uid://n68w8i2nmcnq" path="res://scripts/player/player.gd" id="2_dovo2"]
 [ext_resource type="Texture2D" uid="uid://dkb7yd6mldmh1" path="res://sprites temporarios/square 24.png" id="2_lvxji"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="3_75vfm"]
 [ext_resource type="Script" uid="uid://cs8xwh6gcprqm" path="res://scripts/systems/equipment/equipment_manager.gd" id="5_p47bc"]
+[ext_resource type="Script" uid="uid://ff1dw4k8ghdf" path="res://scripts/systems/upgrades/upgrade_manager.gd" id="6_0owmy"]
 [ext_resource type="Script" uid="uid://c0sm2bon62rk1" path="res://scripts/systems/equipment/equipment_slot.gd" id="6_75vfm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_lvxji"]
@@ -44,3 +45,7 @@ script = ExtResource("6_75vfm")
 [node name="DefenseSlot" type="Node2D" parent="EquipmentManager"]
 
 [node name="MagicSlot" type="Node2D" parent="EquipmentManager"]
+
+[node name="UpgradeManager" type="Node" parent="."]
+script = ExtResource("6_0owmy")
+metadata/_custom_type_script = "uid://ff1dw4k8ghdf"

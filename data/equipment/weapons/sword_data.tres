@@ -1,41 +1,56 @@
-[gd_resource type="Resource" script_class="WeaponData" load_steps=14 format=3 uid="uid://sa73tsldjckv"]
+[gd_resource type="Resource" script_class="WeaponData" load_steps=20 format=3 uid="uid://dnqbqfgefxr0v"]
 
 [ext_resource type="Script" uid="uid://crjms84mooixl" path="res://scripts/systems/combat/attacks/attack_pattern_melee.gd" id="1_my68t"]
 [ext_resource type="PackedScene" uid="uid://c6m2m5mov0tcc" path="res://effects/slash/arc_slash.tscn" id="2_pc32y"]
-[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_rgl6o"]
 [ext_resource type="Script" uid="uid://bislmwbuulstf" path="res://scripts/resources/equipment/weapon_data.gd" id="3_pc32y"]
 [ext_resource type="Script" uid="uid://6p1kdo02pawy" path="res://scripts/resources/attacks/attack_data.gd" id="3_sy21l"]
-[ext_resource type="Resource" uid="uid://bjvuiada4qxhv" path="res://data/combat/hit/composite_hit.tres" id="4_jyf0i"]
 [ext_resource type="Script" uid="uid://bsknupp63dlxw" path="res://scripts/resources/shapes/cone_shape.gd" id="4_okgb1"]
+[ext_resource type="Script" uid="uid://bn40ld13rhgxn" path="res://scripts/systems/combat/hit/hit_policy.gd" id="4_ola51"]
 [ext_resource type="PackedScene" uid="uid://b4oyejcey257m" path="res://scenes/equipment/Weapon.tscn" id="4_rgl6o"]
+[ext_resource type="Script" uid="uid://fncejebq5o0l" path="res://scripts/systems/combat/hit/damage_policy.gd" id="5_1ay0g"]
+[ext_resource type="Script" uid="uid://dy4fgv2rbd0th" path="res://scripts/systems/combat/hit/composite_hit_policy.gd" id="5_5wuh4"]
 [ext_resource type="Script" uid="uid://bmejlq1oy7ska" path="res://scripts/resources/shapes/arc_shape.gd" id="5_sy21l"]
+[ext_resource type="Script" uid="uid://d0mgk7lia85k1" path="res://scripts/systems/combat/hit/knockback_policy.gd" id="6_b3yfv"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="7_jyf0i"]
 
-[sub_resource type="Resource" id="Resource_lexvb"]
+[sub_resource type="Resource" id="Resource_1ay0g"]
 script = ExtResource("1_my68t")
 metadata/_custom_type_script = "uid://crjms84mooixl"
 
-[sub_resource type="Resource" id="Resource_jyf0i"]
+[sub_resource type="Resource" id="Resource_g57gn"]
+script = ExtResource("5_1ay0g")
+metadata/_custom_type_script = "uid://fncejebq5o0l"
+
+[sub_resource type="Resource" id="Resource_dbhko"]
+script = ExtResource("6_b3yfv")
+metadata/_custom_type_script = "uid://d0mgk7lia85k1"
+
+[sub_resource type="Resource" id="Resource_ola51"]
+script = ExtResource("5_5wuh4")
+policies = Array[ExtResource("4_ola51")]([SubResource("Resource_g57gn"), SubResource("Resource_dbhko")])
+metadata/_custom_type_script = "uid://dy4fgv2rbd0th"
+
+[sub_resource type="Resource" id="Resource_5wuh4"]
 script = ExtResource("4_okgb1")
 metadata/_custom_type_script = "uid://bsknupp63dlxw"
 
-[sub_resource type="Resource" id="Resource_okgb1"]
+[sub_resource type="Resource" id="Resource_b3yfv"]
 script = ExtResource("5_sy21l")
 metadata/_custom_type_script = "uid://bmejlq1oy7ska"
 
-[sub_resource type="Resource" id="Resource_cjmyt"]
+[sub_resource type="Resource" id="Resource_tuh14"]
 script = ExtResource("3_sy21l")
 attack_scene = ExtResource("2_pc32y")
-hit_policy = ExtResource("4_jyf0i")
-shape = SubResource("Resource_okgb1")
-hit_shape = SubResource("Resource_jyf0i")
+hit_policy = SubResource("Resource_ola51")
+shape = SubResource("Resource_b3yfv")
+hit_shape = SubResource("Resource_5wuh4")
 metadata/_custom_type_script = "uid://6p1kdo02pawy"
 
 [resource]
 script = ExtResource("3_pc32y")
 weapon_scene = ExtResource("4_rgl6o")
-attack_pattern = SubResource("Resource_lexvb")
-attacks = Array[ExtResource("3_sy21l")]([SubResource("Resource_cjmyt")])
-cooldown = 2.0
+attack_pattern = SubResource("Resource_1ay0g")
+attacks = Array[ExtResource("3_sy21l")]([SubResource("Resource_tuh14")])
 id = "weapon_sword_basic"
-name = "Basic Sword"
+name = "Sword Basic"
 metadata/_custom_type_script = "uid://bislmwbuulstf"

@@ -36,17 +36,13 @@ func _on_attack_requested() -> void:
 		if eq is WeaponBase:
 			eq.try_attack()
 
-	# if weapon_slot.current_equipment:
-	# 	weapon_slot.current_equipment.try_attack()
-
 
 func get_final_weapon_data(base_data: WeaponData) -> WeaponData:
 	var final = base_data.duplicate(true)
-
 	for mod in base_data.modifiers:
 		mod.apply(final)
 
-	for mod in global_modifiers:
+	for mod in player.upgrade_manager.get_modifiers():
 		mod.apply(final)
 
 	return final

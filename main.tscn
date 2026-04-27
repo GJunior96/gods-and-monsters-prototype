@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://gx3ee0mq62ff" path="res://scenes/enemies/enemyTank.tscn" id="4_5vw27"]
 [ext_resource type="Script" uid="uid://coh3vo3ncnwe8" path="res://scripts/ui/xp_bar_ui.gd" id="5_7mycd"]
 [ext_resource type="PackedScene" uid="uid://ddayxe2ujmpub" path="res://scenes/systems/enemy_spawner.tscn" id="5_lquwl"]
-[ext_resource type="PackedScene" uid="uid://bcdx48b1luddu" path="res://scenes/ui/UpgradeUI.tscn" id="6_7mycd"]
+[ext_resource type="Script" uid="uid://rrfdkxoey2a5" path="res://scripts/ui/ui_manager.gd" id="8_5vw27"]
 
 [node name="Main" type="Node2D"]
 position = Vector2(-20, -47)
@@ -20,6 +20,7 @@ rotation = 3.1415927
 enemy_scenes = Array[PackedScene]([ExtResource("3_1bvp3"), ExtResource("3_272bh"), ExtResource("4_5vw27")])
 
 [node name="GameOverUi" parent="." instance=ExtResource("4_1bvp3")]
+visible = false
 
 [node name="XPBar" type="CanvasLayer" parent="."]
 script = ExtResource("5_7mycd")
@@ -29,4 +30,7 @@ visible = false
 offset_right = 73.0
 offset_bottom = 14.0
 
-[node name="UpgradeUi" parent="." instance=ExtResource("6_7mycd")]
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="UIManager" type="Node" parent="."]
+script = ExtResource("8_5vw27")

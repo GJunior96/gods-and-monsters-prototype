@@ -1,22 +1,20 @@
 extends Node
 
 var items_by_id := {}
+var _loaded := false
 
-func _ready():
-	_load_items_from_folder("res://data/equipment")
+func _ensure_loaded():
+	if _loaded:
+		return
 
+	var items = ResourceLoaderUtil._load_resources_from_folder("res://data/equipment", EquipmentData.TYPE)
 
-func _load_items_from_folder(path: String):
-	var dir = DirAccess.open(path)
+	for item in items:
+		items_by_id[item.id] = item
 
-	for file in dir.get_files():
-		if file.ends_with(".tres"):
-			var item = load(path + "/" + file)
-			items_by_id[item.id] = item
+	_loaded = true
 
-	for folder in dir.get_directories():
-		_load_items_from_folder(path + "/" + folder)
-		
 
 func get_item(id: String) -> EquipmentData:
+	_ensure_loaded()
 	return items_by_id.get(id)

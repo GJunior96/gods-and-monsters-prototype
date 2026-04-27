@@ -1,6 +1,6 @@
 class_name TargetingUtils
 
-static func _get_nearest_enemy(from: Vector2) -> Node2D:
+static func get_nearest_enemy(from: Vector2) -> Node2D:
 	var enemies = EnemyManager.enemies
 
 	var nearest = null

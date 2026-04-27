@@ -2,7 +2,6 @@ extends Node2D
 
 @onready var hit_area: Area2D = $Area2D
 @onready var collision: CollisionPolygon2D = $Area2D/CollisionPolygon2D
-@onready var inner_area: Area2D = $InnerArea2D
 
 @export var is_debug := false
 
@@ -72,8 +71,6 @@ func _set_hit_active(active: bool) -> void:
 	_hit_active = active
 	if hit_area:
 		hit_area.monitoring = active
-	if inner_area:
-		inner_area.monitoring = active
 
 
 func _on_area_2d_area_entered(area: Area2D) -> void:

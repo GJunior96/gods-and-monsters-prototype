@@ -55,7 +55,6 @@ func get_available_enemies():
 
 		if GameManager.time_survived >= enemy.min_spawn_time:
 			available.append(scene)
-			#GlobalLogger.log("ENEMY: %s SPAWN TIME: %s " % [ enemy.name, enemy.min_spawn_time ])
 			
 		enemy.queue_free()
 
