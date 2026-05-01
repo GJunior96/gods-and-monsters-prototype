@@ -1,5 +1,5 @@
 class_name AreaModifier
-extends AttackModifier
+extends Modifier
 
 @export var bonus_radius: float
 

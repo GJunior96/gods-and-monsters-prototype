@@ -7,7 +7,7 @@ extends EquipmentData
 
 @export var cooldown: float = 0.5
 @export var attack_range: float = 80
-@export var modifiers: Array[AttackModifier]
+@export var modifiers: Array[Modifier]
 
 @export var projectile_scene: PackedScene
 

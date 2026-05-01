@@ -13,4 +13,11 @@ extends Resource
 @export var hit_start: float = 0.2
 @export var hit_end: float = 0.5
 
+@export var crit_chance: float = 0.0
+@export var crit_multiplier: float = 1.0
+
+@export var chain_count: int = 0
+@export var split_count: int = 0
+@export var split_angle: float = 0.0
+
 @export var swing_angle: float = 90.0

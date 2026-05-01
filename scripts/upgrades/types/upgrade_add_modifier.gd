@@ -1,9 +1,9 @@
 class_name UpgradeAddModifier
 extends UpgradeData
 
-@export var modifier: AttackModifier
+@export var modifier: Modifier
 
-func apply(player, manager) -> void:
+func apply(_player, manager) -> void:
 	var stacks = manager.get_stack(id)
 	for i in range(stacks):
-		player.equipment_manager.add_global_modifier(modifier)
+		manager.add_global_modifier(modifier)

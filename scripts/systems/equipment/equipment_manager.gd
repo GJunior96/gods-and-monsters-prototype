@@ -7,7 +7,6 @@ extends Node
 var player: Node2D
 #var slots := {}
 var slots: Dictionary[SlotType.Type, EquipmentSlot] = {}
-var global_modifiers: Array[AttackModifier] = []
 
 
 func setup(_player: Node2D) -> void:
@@ -22,7 +21,7 @@ func _ready():
 	#slots["magic"] = $MagicSlot
 
 
-func equip(data: EquipmentData, player) -> void:
+func equip(data: EquipmentData, _player) -> void:
 	var equipment = data.create_instance(player)
 	var slot = slots[data.slot_type]
 
@@ -39,18 +38,27 @@ func _on_attack_requested() -> void:
 
 func get_final_weapon_data(base_data: WeaponData) -> WeaponData:
 	var final = base_data.duplicate(true)
+
+	var additive_mods := []
+	var multiplicative_mods := []
+
 	for mod in base_data.modifiers:
-		mod.apply(final)
+		_sort_modifiers(mod, additive_mods, multiplicative_mods)
 
 	for mod in player.upgrade_manager.get_modifiers():
+		_sort_modifiers(mod, additive_mods, multiplicative_mods)
+
+	for mod in additive_mods:
+		mod.apply(final)
+
+	for mod in multiplicative_mods:
 		mod.apply(final)
 
 	return final
 
 
-func add_global_modifier(modifier: AttackModifier) -> void:
-	global_modifiers.append(modifier)
-
-
-func clear_global_modifiers() -> void:
-	global_modifiers.clear()
+func _sort_modifiers(mod, additive_mods, multiplicative_mods) -> void:
+	if mod.type == ModifierType.Type.ADDITIVE:
+		additive_mods.append(mod)
+	elif mod.type == ModifierType.Type.MULTIPLICATIVE:
+		multiplicative_mods.append(mod)

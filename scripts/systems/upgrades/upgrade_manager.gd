@@ -3,7 +3,7 @@ extends Node
 
 var player
 var upgrades := {} # id -> stacks
-var global_modifiers: Array[AttackModifier] = []
+var global_modifiers: Array[Modifier] = []
 
 
 func setup(p):
@@ -40,7 +40,7 @@ func get_stack(id: String) -> int:
 	return upgrades.get(id, 0)
 
 
-func add_modifier(modifier: AttackModifier) -> void:
+func add_modifier(modifier: Modifier) -> void:
 	global_modifiers.append(modifier)
 
 

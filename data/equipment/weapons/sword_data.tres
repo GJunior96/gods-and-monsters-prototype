@@ -11,7 +11,7 @@
 [ext_resource type="Script" uid="uid://dy4fgv2rbd0th" path="res://scripts/systems/combat/hit/composite_hit_policy.gd" id="5_5wuh4"]
 [ext_resource type="Script" uid="uid://bmejlq1oy7ska" path="res://scripts/resources/shapes/arc_shape.gd" id="5_sy21l"]
 [ext_resource type="Script" uid="uid://d0mgk7lia85k1" path="res://scripts/systems/combat/hit/knockback_policy.gd" id="6_b3yfv"]
-[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="7_jyf0i"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/modifier.gd" id="7_jyf0i"]
 
 [sub_resource type="Resource" id="Resource_1ay0g"]
 script = ExtResource("1_my68t")

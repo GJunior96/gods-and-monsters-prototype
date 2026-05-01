@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bg3kgbmttywrr" path="res://scripts/systems/combat/modifiers/damage_modifier.gd" id="1_8t7fn"]
 [ext_resource type="Script" uid="uid://d3vvhfk3x2h8n" path="res://scripts/upgrades/types/upgrade_add_modifier.gd" id="1_b7b65"]
-[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/attack_modifier.gd" id="2_qc84x"]
+[ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/modifier.gd" id="2_qc84x"]
 
 [sub_resource type="Resource" id="Resource_0he5s"]
 script = ExtResource("1_8t7fn")
