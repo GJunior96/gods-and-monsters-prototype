@@ -54,6 +54,9 @@ func get_final_weapon_data(base_data: WeaponData) -> WeaponData:
 	for mod in multiplicative_mods:
 		mod.apply(final)
 
+	for atk in player.upgrade_manager.extra_attacks:
+		final.attacks.append(atk.duplicate(true))
+
 	return final
 
 

@@ -13,10 +13,6 @@
 [ext_resource type="Script" uid="uid://d0mgk7lia85k1" path="res://scripts/systems/combat/hit/knockback_policy.gd" id="6_b3yfv"]
 [ext_resource type="Script" uid="uid://cak03ua1wmrtk" path="res://scripts/systems/combat/modifiers/modifier.gd" id="7_jyf0i"]
 
-[sub_resource type="Resource" id="Resource_1ay0g"]
-script = ExtResource("1_my68t")
-metadata/_custom_type_script = "uid://crjms84mooixl"
-
 [sub_resource type="Resource" id="Resource_g57gn"]
 script = ExtResource("5_1ay0g")
 metadata/_custom_type_script = "uid://fncejebq5o0l"
@@ -34,6 +30,10 @@ metadata/_custom_type_script = "uid://dy4fgv2rbd0th"
 script = ExtResource("4_okgb1")
 metadata/_custom_type_script = "uid://bsknupp63dlxw"
 
+[sub_resource type="Resource" id="Resource_1ay0g"]
+script = ExtResource("1_my68t")
+metadata/_custom_type_script = "uid://crjms84mooixl"
+
 [sub_resource type="Resource" id="Resource_b3yfv"]
 script = ExtResource("5_sy21l")
 metadata/_custom_type_script = "uid://bmejlq1oy7ska"
@@ -41,6 +41,7 @@ metadata/_custom_type_script = "uid://bmejlq1oy7ska"
 [sub_resource type="Resource" id="Resource_tuh14"]
 script = ExtResource("3_sy21l")
 attack_scene = ExtResource("2_pc32y")
+pattern = SubResource("Resource_1ay0g")
 hit_policy = SubResource("Resource_ola51")
 shape = SubResource("Resource_b3yfv")
 hit_shape = SubResource("Resource_5wuh4")
@@ -49,7 +50,6 @@ metadata/_custom_type_script = "uid://6p1kdo02pawy"
 [resource]
 script = ExtResource("3_pc32y")
 weapon_scene = ExtResource("4_rgl6o")
-attack_pattern = SubResource("Resource_1ay0g")
 attacks = Array[ExtResource("3_sy21l")]([SubResource("Resource_tuh14")])
 id = "weapon_sword_basic"
 name = "Sword Basic"

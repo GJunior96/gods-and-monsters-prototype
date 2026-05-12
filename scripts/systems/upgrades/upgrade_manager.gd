@@ -4,6 +4,7 @@ extends Node
 var player
 var upgrades := {} # id -> stacks
 var global_modifiers: Array[Modifier] = []
+var extra_attacks: Array[AttackData] = []
 
 
 func setup(p):
@@ -20,6 +21,9 @@ func apply_upgrade(upgrade: UpgradeData):
 func rebuild():
 	# Clear all modifiers
 	global_modifiers.clear()
+
+	# Clear all extra attacks
+	extra_attacks.clear()
 
 	# reset base stats
 	reset_player_stats()
@@ -46,3 +50,7 @@ func add_modifier(modifier: Modifier) -> void:
 
 func get_modifiers() -> Array:
 	return global_modifiers
+
+
+func add_extra_attack(attack: AttackData) -> void:
+	extra_attacks.append(attack)

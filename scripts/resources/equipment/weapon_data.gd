@@ -2,7 +2,7 @@ class_name WeaponData
 extends EquipmentData
 
 @export var weapon_scene: PackedScene
-@export var attack_pattern: AttackPattern
+#@export var attack_pattern: AttackPattern
 @export var attacks: Array[AttackData]
 
 @export var cooldown: float = 0.5
